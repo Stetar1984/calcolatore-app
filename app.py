@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # ==============================================================================
-# --- FUNZIONE DI CALCOLO IRPEF (UNIVERSALE) ---
+# --- Funzione di Calcolo IRPEF (Universale) ---
 # ==============================================================================
 def calcola_irpef(imponibile):
     if imponibile <= 0: return 0
@@ -86,34 +86,6 @@ if tipo_calcolo == 'Ditta Individuale':
         st.table(df_risultati.style.format("{:,.2f} €"))
         st.subheader(f"RISPARMIO / (MAGGIOR ONERE): {risparmio_fiscale:,.2f} €")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ==============================================================================
 # --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
 # ==============================================================================
@@ -143,7 +115,7 @@ elif tipo_calcolo == 'Società di Persone':
             with tab:
                 socio_data = {}
                 c1, c2 = st.columns(2)
-                socio_data['nome'] = c1.text_input(f"Nome Socio {i+1}", value=f"Socio {i+1}", key=f"nome_{i}")
+                socio_data['nome'] = st.text_input(f"Nome Socio {i+1}", value=f"Socio {i+1}", key=f"nome_{i}")
                 socio_data['quota'] = c2.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=50.0 if i < 2 else 0.0, format="%.2f", key=f"quota_{i}")
                 
                 col_socio1, col_socio2 = st.columns(2)
@@ -178,19 +150,18 @@ elif tipo_calcolo == 'Società di Persone':
             
             st.markdown(f"##### Riepilogo per: {socio['nome']} (Quota: {socio['quota']:.2f}%)")
             
-            # Ripartizione redditi
             quota_reddito_simulato = reddito_simulato_2024_soc * perc_socio
             quota_reddito_rilevante = reddito_rilevante_cpb_2023_soc * perc_socio
             quota_reddito_proposto = reddito_proposto_cpb_2024_soc * perc_socio
             quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
             
-            # Calcolo SENZA concordato
-            base_imponibile_no_cpb = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
+            # --- CORREZIONE DELLE FORMULE QUI ---
+            base_imponibile_no_cpb = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili']
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb)
-            carico_fiscale_no_cpb = (imp_lorda_no_cpb + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['detrazioni_irpef']
+            irpef_netta_no_cpb = irpef_lorda_no_cpb - socio['detrazioni_irpef']
+            carico_fiscale_no_cpb = (irpef_netta_no_cpb if irpef_netta_no_cpb > 0 else 0) + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['crediti_imposta']
             
-            # Calcolo CON concordato
-            base_imponibile_si_cpb = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
+            base_imponibile_si_cpb = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili']
             base_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
             if base_sostitutiva < 0: base_sostitutiva = 0
             if punteggio_isa_n_soc >= 8: aliquota_sostitutiva = 0.10
@@ -198,7 +169,8 @@ elif tipo_calcolo == 'Società di Persone':
             else: aliquota_sostitutiva = 0.15
             imposta_sostitutiva = base_sostitutiva * aliquota_sostitutiva
             irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb)
-            carico_fiscale_concordato = (irpef_lorda_si_cpb + imposta_sostitutiva + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['detrazion_irpef']
+            irpef_netta_si_cpb = irpef_lorda_si_cpb - socio['detrazioni_irpef']
+            carico_fiscale_concordato = (irpef_netta_si_cpb if irpef_netta_si_cpb > 0 else 0) + imposta_sostitutiva + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['crediti_imposta']
             
             risparmio = carico_fiscale_no_cpb - carico_fiscale_concordato
             
@@ -211,7 +183,6 @@ elif tipo_calcolo == 'Società di Persone':
             st.table(df_socio.style.format("{:,.2f} €"))
             st.write(f"**RISPARMIO / (MAGGIOR ONERE) per {socio['nome']}: {risparmio:,.2f} €**")
             st.markdown("---")
-
 
 
 
