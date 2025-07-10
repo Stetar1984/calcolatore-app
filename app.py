@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # ==============================================================================
-# --- Funzione di Calcolo IRPEF (Universale) ---
+# --- Funzione di Calcolo IRPEF ---
 # ==============================================================================
 def calcola_irpef(imponibile):
     if imponibile <= 0: return 0
@@ -23,7 +23,6 @@ tipo_calcolo = st.radio(
     "Seleziona il tipo di calcolo:",
     ('Ditta Individuale', 'Società di Persone'),
     horizontal=True,
-    label_visibility="collapsed"
 )
 st.markdown("---")
 
@@ -61,7 +60,7 @@ if tipo_calcolo == 'Ditta Individuale':
         base_imponibile_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
         tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb)
         totale_tassazione_no_cpb = tassazione_no_cpb_irpef - imposte_gia_trattenute + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef
-        
+
         # Calcoli CON concordato
         base_imponibile_si_cpb = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
@@ -79,16 +78,9 @@ if tipo_calcolo == 'Ditta Individuale':
         st.subheader(f"Risultati per: {nome_ditta}")
         
         df_risultati = pd.DataFrame({
-            "Descrizione": ["Base Imponibile IRPEF (con CPB)", "Base Imponibile IRPEF (senza CPB)", "Imposta Sostitutiva", "TOTALE TASSE (CON ADESIONE CPB)", "Tassazione Totale (SENZA ADESIONE CPB)"],
-            "Valore Calcolato": [base_imponibile_si_cpb, base_imp_no_cpb, imposta_sostitutiva, totale_tassazione_si_cpb, totale_tassazione_no_cpb]
+            "Descrizione": ["Base Imponibile IRPEF (con CPB)", "Base Imponibile IRPEF (senza CPB)", "Base Imponibile Sostitutiva", "Imposta Sostitutiva Calcolata", "Tassazione Ordinaria Residua (con CPB)", "TOTALE TASSE (CON ADESIONE CPB)", "Tassazione Totale (SENZA ADESIONE CPB)"],
+            "Valore Calcolato": [base_imponibile_si_cpb, base_imponibile_no_cpb, base_imponibile_sostitutiva, imposta_sostitutiva, tass_ordinaria_si_cpb, totale_tassazione_si_cpb, totale_tassazione_no_cpb]
         }).set_index("Descrizione")
         
         st.table(df_risultati.style.format("{:,.2f} €"))
         st.subheader(f"RISPARMIO / (MAGGIOR ONERE): {risparmio_fiscale:,.2f} €")
-
-# ==============================================================================
-# --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
-# ==============================================================================
-elif tipo_calcolo == 'Società di Persone':
-    st.header("Simulazione per Società di Persone")
-    st.info("La sezione per le società di persone è in fase di sviluppo.")
