@@ -5,7 +5,7 @@ import base64
 
 #==============================================================================
 # --- Funzioni Helper Globali ---
-#==============================================================================
+#=============================================================================
 def create_download_link(html_content, filename, link_text):
     """Genera un link per scaricare una stringa HTML come file."""
     style = "<style> body { font-family: Arial, sans-serif; margin: 20px; } h1, h2, h3, h4, h5 { color: #333; } table { border-collapse: collapse; width: 80%; margin: 20px 0; font-size: 12px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } </style>"
