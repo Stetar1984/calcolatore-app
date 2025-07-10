@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # ==============================================================================
-# --- FUNZIONE DI CALCOLO IRPEF (UNIVERSALE) ---
+# --- Funzione di Calcolo IRPEF (Universale) ---
 # ==============================================================================
 def calcola_irpef(imponibile):
     if imponibile <= 0: return 0
@@ -51,6 +51,7 @@ if tipo_calcolo == 'Ditta Individuale':
             imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA 2024:", value=0.0, format="%.2f")
             acconti_versati = st.number_input("ACCONTI VERSATI 2024:", value=0.0, format="%.2f")
             detrazioni_irpef = st.number_input("DETRAZIONI IRPEF 2024:", value=0.0, format="%.2f")
+            # --- CAMPO MANCANTE AGGIUNTO QUI ---
             crediti_imposta = st.number_input("CREDITI D'IMPOSTA 2024:", value=0.0, format="%.2f")
 
         submitted = st.form_submit_button("Esegui Simulazione")
@@ -87,6 +88,10 @@ if tipo_calcolo == 'Ditta Individuale':
         
         st.table(df_risultati.style.format("{:,.2f} €"))
         st.subheader(f"RISPARMIO / (MAGGIOR ONERE): {risparmio_fiscale:,.2f} €")
+
+
+
+
 
 # ==============================================================================
 # --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
@@ -187,3 +192,8 @@ elif tipo_calcolo == 'Società di Persone':
             st.table(df_socio.style.format("{:,.2f} €"))
             st.write(f"**RISPARMIO / (MAGGIOR ONERE) per {socio['nome']}: {risparmio:,.2f} €**")
             st.markdown("---")
+
+
+
+
+
