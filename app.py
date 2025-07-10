@@ -1,4 +1,3 @@
-import ipywidgets as widgets
 from IPython.display import display, clear_output, HTML
 import pandas as pd
 import base64
