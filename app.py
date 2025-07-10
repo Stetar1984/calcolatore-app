@@ -158,12 +158,6 @@ output_area_soc = widgets.Output(); output_export_soc = widgets.Output()
 
 
 
-
-
-
-
-
-
 def esegui_calcolo_societa(b):
     with output_area_soc:
         clear_output(wait=True); val_societa = {k: w.value for k, w in input_societa_widgets.items()}
