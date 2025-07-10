@@ -187,7 +187,7 @@ elif tipo_calcolo == 'Società di Persone':
             # Calcolo SENZA concordato
             base_imponibile_no_cpb = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb)
-            carico_fiscale_no_cpb = (irpef_lorda_no_cpb + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['detrazioni_irpef']
+            carico_fiscale_no_cpb = (imp_lorda_no_cpb + socio['imposta_su_cedolare_secca'] - socio['imposte_gia_trattenute'] - socio['acconti_versati'] - socio['detrazioni_irpef']
             
             # Calcolo CON concordato
             base_imponibile_si_cpb = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
