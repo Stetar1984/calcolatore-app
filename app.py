@@ -4,11 +4,41 @@ import pandas as pd
 # ==============================================================================
 # --- FUNZIONE DI CALCOLO IRPEF (UNIVERSALE) ---
 # ==============================================================================
+
 def calcola_irpef(imponibile):
+    """Calcola l'IRPEF lorda basata sugli scaglioni."""
     if imponibile <= 0: return 0
     if imponibile <= 28000: return imponibile * 0.23
     elif imponibile <= 50000: return (28000 * 0.23) + ((imponibile - 28000) * 0.35)
     else: return (28000 * 0.23) + (22000 * 0.35) + ((imponibile - 50000) * 0.43)
+
+
+
+
+#==============================================================================
+# --- DEFINIZIONE CALCOLATORE N.1: DITTA INDIVIDUALE ---
+#==============================================================================
+
+style_ind = {'description_width': 'initial'}
+layout_ind = widgets.Layout(width='auto', margin='3px 0')
+input_widgets_ind = {
+    'nome_ditta': widgets.Text(value='La Mia Ditta Individuale', description="NOME DITTA:", style=style_ind, layout=layout_ind),
+    'reddito_simulato_2024': widgets.FloatText(value=0, description="REDDITO DA SIMULARE O PRESUNTO 2024:", style=style_ind, layout=layout_ind),
+    'reddito_rilevante_cpb_2023': widgets.FloatText(value=0, description="REDDITO RILEVANTE CPB 2023:", style=style_ind, layout=layout_ind),
+    'reddito_proposto_cpb_2024': widgets.FloatText(value=0, description="REDDITO PROPOSTO 2024 AI FINI CPB:", style=style_ind, layout=layout_ind),
+    'reddito_impresa_rettificato_cpb': widgets.FloatText(value=0, description="REDDITO D'IMPRESA RETTIFICATO PER CPB 2024:", style=style_ind, layout=layout_ind),
+    'punteggio_isa_n_ind': widgets.FloatSlider(value=1.0, min=1, max=10, step=0.1, description="Punteggio ISA anno n (2023):", style=style_ind, layout=layout_ind),
+    'altri_redditi': widgets.FloatText(value=0, description="ALTRI REDDITI TASSABILI IRPEF 2024:", style=style_ind, layout=layout_ind),
+    'oneri_deducibili': widgets.FloatText(value=0, description="ONERI DEDUCIBILI 2024:", style=style_ind, layout=layout_ind),
+    'cedolare_secca_redditi': widgets.FloatText(value=0, description="REDDITI A CEDOLARE SECCA O TASS. SEP. 2024:", style=style_ind, layout=layout_ind),
+    'imposte_gia_trattenute': widgets.FloatText(value=0, description="IMPOSTE SU REDDITI GIA' TASSATI 2024:", style=style_ind, layout=layout_ind),
+    'imposta_su_cedolare_secca': widgets.FloatText(value=0, description="IMPOSTA SU CEDOLARE SECCA 2024:", style=style_ind, layout=layout_ind),
+    'acconti versati': widgets.FloatText(value=0, description="ACCONTI VERSATI 2024:", style=style_ind, layout=layout_ind),
+    'detrazioni IRPEF' : widgets.FloatText(value=0, description="DETRAZIONI IRPEF 2024:", style=style_ind, layout=layout_ind)
+
+
+
+
 
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
@@ -72,6 +102,13 @@ if tipo_calcolo == 'Ditta Individuale':
     if submitted_ind:
         # (La logica di calcolo rimane invariata)
         pass
+
+
+
+
+
+
+
 
 # ==============================================================================
 # --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
