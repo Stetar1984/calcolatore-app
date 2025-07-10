@@ -1,9 +1,17 @@
 import streamlit as st
 import pandas as pd
+import base64
 
 #==============================================================================
-# --- Funzione di Calcolo IRPEF (Universale) ---
+# --- Funzioni Helper Globali ---
 #==============================================================================
+def create_download_link(html_content, filename, link_text):
+    """Genera un link per scaricare una stringa HTML come file."""
+    style = "<style> body { font-family: Arial, sans-serif; margin: 20px; } h1, h2, h3, h4, h5 { color: #333; } table { border-collapse: collapse; width: 80%; margin: 20px 0; font-size: 12px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } </style>"
+    final_html = f"<html><head><title>Report CPB</title>{style}</head><body>{html_content}</body></html>"
+    b64 = base64.b64encode(final_html.encode('utf-8')).decode()
+    return f'<a href="data:text/html;base64,{b64}" download="{filename}" style="font-size: 14px; background-color: #17a2b8; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">{link_text}</a>'
+
 def calcola_irpef(imponibile):
     """Calcola l'IRPEF lorda basata sugli scaglioni."""
     if imponibile <= 0: return 0
@@ -80,7 +88,6 @@ if tipo_calcolo == 'Ditta Individuale':
         base_imponibile_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
         tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb)
         totale_tassazione_no_cpb = tassazione_no_cpb_irpef - imposte_gia_trattenute + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef
-        
         # Calcoli CON concordato
         base_imponibile_si_cpb = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
@@ -91,19 +98,17 @@ if tipo_calcolo == 'Ditta Individuale':
         imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
         tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb)
         totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef - imposte_gia_trattenute
-        
         risparmio_fiscale = totale_tassazione_no_cpb - totale_tassazione_si_cpb
         
         st.markdown(f"<h4>Risultati per: {nome_ditta}</h4>", unsafe_allow_html=True)
         df_risultati = pd.DataFrame({"Senza Concordato": [f"{totale_tassazione_no_cpb:,.2f} €"], "Con Concordato": [f"{totale_tassazione_si_cpb:,.2f} €"], "Risparmio/Onere": [f"{risparmio_fiscale:,.2f} €"]}, index=["Carico Fiscale Totale"])
         st.table(df_risultati)
 
-# ==============================================================================
+#==============================================================================
 # --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
-# ==============================================================================
+#==============================================================================
 elif tipo_calcolo == 'Società di Persone':
     st.header("Simulazione per Società di Persone")
-    
     with st.form("form_societa"):
         st.subheader("Dati Società")
         col1, col2 = st.columns(2)
@@ -120,7 +125,6 @@ elif tipo_calcolo == 'Società di Persone':
         
         st.markdown("---")
         st.subheader("Dati dei Singoli Soci")
-        
         tabs = st.tabs([f"Socio {i+1}" for i in range(4)])
         soci_inputs = []
         for i, tab in enumerate(tabs):
