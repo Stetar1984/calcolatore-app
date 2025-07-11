@@ -13,6 +13,13 @@ def calcola_irpef(imponibile):
     elif imponibile <= 50000: return (28000 * 0.23) + ((imponibile - 28000) * 0.35)
     else: return (28000 * 0.23) + (22000 * 0.35) + ((imponibile - 50000) * 0.43)
 
+def create_download_link_html(html_content, filename):
+    """Genera un link di download per una stringa HTML come file."""
+    style = "<style> body { font-family: Arial, sans-serif; margin: 20px; } h1, h2, h3, h4, h5 { color: #333; } table { border-collapse: collapse; width: 80%; margin: 20px 0; font-size: 12px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } </style>"
+    final_html = f"<html><head><title>Report CPB</title>{style}</head><body>{html_content}</body></html>"
+    b64 = base64.b64encode(final_html.encode('utf-8')).decode()
+    return f'<a href="data:text/html;base64,{b64}" download="{filename}" style="display: inline-block; padding: 8px 16px; background-color: #007bff; color: white; text-align: center; text-decoration: none; border-radius: 5px;">Scarica Report Dettagliato</a>'
+
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
 # ==============================================================================
@@ -45,7 +52,6 @@ tipo_calcolo = st.radio(
     "Seleziona il tipo di calcolo:",
     ('Ditta Individuale', 'Società di Persone'),
     horizontal=True,
-    label_visibility="collapsed"
 )
 st.markdown("---")
 
@@ -106,6 +112,7 @@ if tipo_calcolo == 'Ditta Individuale':
 #==============================================================================
 elif tipo_calcolo == 'Società di Persone':
     st.header("Simulazione per Società di Persone")
+    
     with st.form("form_societa"):
         st.subheader("Dati Società")
         col1, col2 = st.columns(2)
@@ -122,6 +129,7 @@ elif tipo_calcolo == 'Società di Persone':
         
         st.markdown("---")
         st.subheader("Dati dei Singoli Soci")
+        
         tabs = st.tabs([f"Socio {i+1}" for i in range(4)])
         soci_inputs = []
         for i, tab in enumerate(tabs):
