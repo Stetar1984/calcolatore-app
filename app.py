@@ -18,7 +18,13 @@ def create_download_link_html(html_content, filename):
     style = "<style> body { font-family: Arial, sans-serif; margin: 20px; } h1, h2, h3, h4, h5 { color: #333; } table { border-collapse: collapse; width: 80%; margin: 20px 0; font-size: 12px; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; } </style>"
     final_html = f"<html><head><title>Report CPB</title>{style}</head><body>{html_content}</body></html>"
     b64 = base64.b64encode(final_html.encode('utf-8')).decode()
-    return f'<a href="data:text/html;base64,{b64}" download="{filename}" style="display: inline-block; padding: 8px 16px; background-color: #007bff; color: white; text-align: center; text-decoration: none; border-radius: 5px;">Scarica Report Dettagliato</a>'
+    # Utilizziamo il componente st.download_button di Streamlit
+    st.download_button(
+        label="Scarica Report Dettagliato",
+        data=final_html,
+        file_name=filename,
+        mime="text/html",
+    )
 
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
@@ -67,20 +73,20 @@ if tipo_calcolo == 'Ditta Individuale':
 
         with col1:
             nome_ditta = st.text_input("NOME DITTA:", value='La Mia Ditta Individuale')
-            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_simulato_2024'])
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_rilevante_cpb_2023'])
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_proposto_cpb_2024'])
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_impresa_rettificato_cpb'])
+            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
             punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
-            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEP. 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
-            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
-            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
-            acconti_versati = st.number_input("ACCONTI VERSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
-            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEP. 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
+            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
+            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
+            acconti_versati = st.number_input("ACCONTI VERSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
+            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
             
         submitted = st.form_submit_button("Esegui Simulazione")
 
