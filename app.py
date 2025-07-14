@@ -68,13 +68,13 @@ if tipo_calcolo == 'Ditta Individuale':
             punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
-            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEP. 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
-            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
-            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
-            acconti_versati = st.number_input("ACCONTI VERSATI 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
-            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
+            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
+            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
+            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
+            acconti_versati = st.number_input("ACCONTI VERSATI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
+            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
             
         submitted = st.form_submit_button("Esegui Simulazione")
 
@@ -132,10 +132,10 @@ elif tipo_calcolo == 'Società di Persone':
                 socio_data['quota_partecipazione'] = c2.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=50.0 if i < 2 else 0.0, format="%.2f", key=f"quota_{i}")
                 col_socio1, col_socio2 = st.columns(2)
                 with col_socio1:
-                    socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
+                    socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
                     socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
-                    socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEP. {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
-                    socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
+                    socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEPARATA {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
+                    socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
                 with col_socio2:
                     socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA {i+1}", value=0.0, format="%.2f", key=f"ics_{i}", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
                     socio_data['acconti versati'] = st.number_input(f"ACCONTI VERSATI {i+1}", value=0.0, format="%.2f", key=f"av_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
