@@ -61,20 +61,20 @@ if tipo_calcolo == 'Ditta Individuale':
 
         with col1:
             nome_ditta = st.text_input("NOME DITTA:", value='La Mia Ditta Individuale')
-            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 2)):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_simulato_2024'])
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_rilevante_cpb_2023'])
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_proposto_cpb_2024'])
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_impresa_rettificato_cpb'])
+            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_simulato_2024'])
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023 (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_rilevante_cpb_2023'])
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_proposto_cpb_2024'])
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024 (CP7 colonna 5):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_impresa_rettificato_cpb'])
             punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
-            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
-            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
-            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
-            acconti_versati = st.number_input("ACCONTI VERSATI:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
-            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF:", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI (da riepilogo redditi RN + LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
+            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
+            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
+            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
+            acconti_versati = st.number_input("ACCONTI VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
+            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
             
         submitted = st.form_submit_button("Esegui Simulazione")
 
