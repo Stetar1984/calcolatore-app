@@ -173,13 +173,3 @@ elif tipo_calcolo == 'Società di Persone':
 
 
 
-
-
-
-
-
-
-
-
-
-
