@@ -113,7 +113,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO FINI CPB (CP1 colonna 1):", value=151784.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
             reddito_impresa_rettificato_cpb_soc = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=152420.49, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
         with col2:
-            valore_produzione_simulato_2024_soc = st.number_input("VALORE PRODUZIONE DA EFFETTIVO O SIMULATO 2024 (IP73 colonna 4):", value=149604.0, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_simulato_2024'))
+            valore_produzione_simulato_2024_soc = st.number_input("VALORE PRODUZIONE EFFETTIVO O SIMULATO (IP73 colonna 4):", value=149604.0, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_simulato_2024'))
             valore_produzione_irap_rettificato_cpb_soc = st.number_input("Valore della produzione IRAP rettificato per CPB (IP74):", value=318210.49, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_irap_rettificato_cpb'))
             punteggio_isa_n_soc = st.slider("Punteggio ISA Società (anno n):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
         
