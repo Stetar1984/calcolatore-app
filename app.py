@@ -43,7 +43,7 @@ descrizioni_aggiuntive = {
 # ==============================================================================
 tipo_calcolo = st.radio(
     "Seleziona il tipo di calcolo:",
-    ('Ditta Individuale', 'Società in trasparenza fiscale'),
+    ('Ditta Individuale', 'Società in trasparenza fiscale',),
     horizontal=True,
     label_visibility="collapsed"
 )
