@@ -108,7 +108,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
         col1, col2 = st.columns(2)
         with col1:
             nome_societa = st.text_input("NOME SOCIETA':", value='Mia Società S.n.c.')
-            reddito_simulato_2024_soc = st.number_input("REDDITO DA EFFETTIVO O SIMULATO (CP10 colonna 6):", value=142000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_simulato_2024_soc = st.number_input("REDDITO DA EFFETTIVO O SIMULATO (CP10 colonna 1):", value=142000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
             reddito_rilevante_cpb_2023_soc = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=139872.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
             reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO FINI CPB (CP1 colonna 1):", value=151784.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
             reddito_impresa_rettificato_cpb_soc = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=152420.49, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
