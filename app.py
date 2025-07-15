@@ -43,11 +43,97 @@ descrizioni_aggiuntive = {
 # ==============================================================================
 tipo_calcolo = st.radio(
     "Seleziona il tipo di calcolo:",
-    ('Ditta Individuale', 'Società in trasparenza fiscale',),
+    ('Professionista, 'Ditta Individuale', 'Società in trasparenza fiscale',),
     horizontal=True,
     label_visibility="collapsed"
 )
 st.markdown("---")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ==============================================================================
+# --- CALCOLATORE PER PROFESSIONISTA ---
+# ==============================================================================
+if tipo_calcolo == 'Professionista':
+    st.header("Simulazione per Professionista")
+    
+    with st.form("form_individuale"):
+        st.subheader("Dati di Input")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            nome_ditta = st.text_input("NOME PROFESSIONISTA:", value='Professionista')
+            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_simulato_2024'])
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023 (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_rilevante_cpb_2023'])
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_proposto_cpb_2024'])
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024 (CP7 colonna 5):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_impresa_rettificato_cpb'])
+            punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
+
+        with col2:
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI (da riepilogo redditi RN + LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['altri_redditi'])
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['oneri_deducibili'])
+            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['cedolare_secca_redditi'])
+            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposte_gia_trattenute'])
+            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['imposta_su_cedolare_secca'])
+            acconti_versati = st.number_input("ACCONTI VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['acconti versati'])
+            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
+            
+        submitted = st.form_submit_button("Esegui Simulazione")
+        
+    if submitted:
+        # Calcoli SENZA concordato
+        base_imponibile_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb)
+        totale_tassazione_no_cpb = tassazione_no_cpb_irpef - imposte_gia_trattenute + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef
+        
+        # Calcoli CON concordato
+        base_imponibile_si_cpb = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
+        base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
+        if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
+        if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
+        elif punteggio_isa_n_ind >= 6: aliquota_sostitutiva = 0.12
+        else: aliquota_sostitutiva = 0.15
+        imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
+        tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb)
+        totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef - imposte_gia_trattenute
+        
+        risparmio_fiscale = totale_tassazione_no_cpb - totale_tassazione_si_cpb
+        
+        st.markdown(f"<h4>Risultati per: {nome_ditta}</h4>", unsafe_allow_html=True)
+        df_risultati = pd.DataFrame({"Senza Concordato": [f"{totale_tassazione_no_cpb:,.2f} €"], "Con Concordato": [f"{totale_tassazione_si_cpb:,.2f} €"], "Risparmio/Onere": [f"{risparmio_fiscale:,.2f} €"]}, index=["Carico Fiscale Totale"])
+        st.table(df_risultati)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ==============================================================================
 # --- CALCOLATORE PER DITTA INDIVIDUALE ---
@@ -100,6 +186,25 @@ if tipo_calcolo == 'Ditta Individuale':
         st.markdown(f"<h4>Risultati per: {nome_ditta}</h4>", unsafe_allow_html=True)
         df_risultati = pd.DataFrame({"Senza Concordato": [f"{totale_tassazione_no_cpb:,.2f} €"], "Con Concordato": [f"{totale_tassazione_si_cpb:,.2f} €"], "Risparmio/Onere": [f"{risparmio_fiscale:,.2f} €"]}, index=["Carico Fiscale Totale"])
         st.table(df_risultati)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 #==============================================================================
 # --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
