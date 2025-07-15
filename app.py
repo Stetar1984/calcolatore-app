@@ -43,7 +43,7 @@ descrizioni_aggiuntive = {
 # ==============================================================================
 tipo_calcolo = st.radio(
     "Seleziona il tipo di calcolo:",
-    ('Ditta Individuale', 'Società di Persone'),
+    ('Ditta Individuale/Professionisti', 'Società in trasparenza fiscale'),
     horizontal=True,
     label_visibility="collapsed"
 )
@@ -52,15 +52,15 @@ st.markdown("---")
 # ==============================================================================
 # --- CALCOLATORE PER DITTA INDIVIDUALE ---
 # ==============================================================================
-if tipo_calcolo == 'Ditta Individuale':
-    st.header("Simulazione per Ditta Individuale")
+if tipo_calcolo == 'Ditta Individuale/Professionisti':
+    st.header("Simulazione per Ditta Individuale/Professionisti")
     
     with st.form("form_individuale"):
         st.subheader("Dati di Input")
         col1, col2 = st.columns(2)
 
         with col1:
-            nome_ditta = st.text_input("NOME DITTA:", value='La Mia Ditta Individuale')
+            nome_ditta = st.text_input("NOME DITTA/PROFESSIONISTA:", value='La Mia Ditta Individuale')
             reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_simulato_2024'])
             reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023 (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_rilevante_cpb_2023'])
             reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['reddito_proposto_cpb_2024'])
@@ -77,7 +77,7 @@ if tipo_calcolo == 'Ditta Individuale':
             detrazioni_irpef = st.number_input("DETRAZIONI IRPEF (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive['detrazioni IRPEF'])
             
         submitted = st.form_submit_button("Esegui Simulazione")
-
+        
     if submitted:
         # Calcoli SENZA concordato
         base_imponibile_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
