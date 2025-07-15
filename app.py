@@ -57,10 +57,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col1:
             nome_soggetto = st.text_input(f"NOME {tipo_calcolo.upper()}:", value=f'Mio Studio {tipo_calcolo}')
-            reddito_simulato_2024 = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 2/CP10 colonna 3):", value=70000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB 2023 (CP1 colonna 2):", value=65000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO 2024 AI FINI CPB (CP1 colonna 1):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB 2024 (CP7 colonna 5):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
+            reddito_simulato_2024 = st.number_input("REDDITO DA EFFETTIVO O SIMULATO (CP10 colonna 2/CP10 colonna 3):", value=70000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=65000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
             punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
 
         with col2:
@@ -108,12 +108,12 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
         col1, col2 = st.columns(2)
         with col1:
             nome_societa = st.text_input("NOME SOCIETA':", value='Mia Società S.n.c.')
-            reddito_simulato_2024_soc = st.number_input("REDDITO DA SIMULARE O PRESUNTO 2024 (CP10 colonna 1):", value=142000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023_soc = st.number_input("REDDITO RILEVANTE CPB 2023 (CP1 colonna 2):", value=139872.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO 2024 FINI CPB (CP1 colonna 1):", value=151784.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_simulato_2024_soc = st.number_input("REDDITO DA EFFETTIVO O SIMULATO (CP10 colonna 1):", value=142000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_rilevante_cpb_2023_soc = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=139872.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
+            reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO FINI CPB (CP1 colonna 1):", value=151784.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
             reddito_impresa_rettificato_cpb_soc = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=152420.49, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
         with col2:
-            valore_produzione_simulato_2024_soc = st.number_input("VALORE PRODUZIONE DA SIMULARE O PRESUNTO 2024 (IP73 colonna 4):", value=149604.0, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_simulato_2024'))
+            valore_produzione_simulato_2024_soc = st.number_input("VALORE PRODUZIONE DA EFFETTIVO O SIMULATO 2024 (IP73 colonna 4):", value=149604.0, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_simulato_2024'))
             valore_produzione_irap_rettificato_cpb_soc = st.number_input("Valore della produzione IRAP rettificato per CPB (IP74):", value=318210.49, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_irap_rettificato_cpb'))
             punteggio_isa_n_soc = st.slider("Punteggio ISA Società (anno n):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
         
@@ -130,14 +130,14 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['quota_partecipazione'] = c2.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=50.0 if i < 2 else 0.0, format="%.2f", key=f"quota_{i}")
                 col_socio1, col_socio2 = st.columns(2)
                 with col_socio1:
-                    socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
-                    socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
-                    socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEP. {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
-                    socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
+                    socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1) {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
+                    socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (RN3) {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+                    socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1) {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
+                    socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4) {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
                 with col_socio2:
-                    socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA {i+1}", value=0.0, format="%.2f", key=f"ics_{i}", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-                    socio_data['acconti versati'] = st.number_input(f"ACCONTI VERSATI {i+1}", value=0.0, format="%.2f", key=f"av_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
-                    socio_data['detrazioni IRPEF'] = st.number_input(f"DETRAZIONI IRPEF {i+1}", value=0.0, format="%.2f", key=f"di_{i}", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
+                    socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) {i+1}", value=0.0, format="%.2f", key=f"ics_{i}", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
+                    socio_data['acconti versati'] = st.number_input(f"ACCONTI VERSATI (RN38 colonna 6) {i+1}", value=0.0, format="%.2f", key=f"av_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
+                    socio_data['detrazioni IRPEF'] = st.number_input(f"DETRAZIONI IRPEF TOTALI (RN22) {i+1}", value=0.0, format="%.2f", key=f"di_{i}", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
                 soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
