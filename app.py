@@ -79,7 +79,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col2:
             altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (escluso INPS) (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
             cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
             imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
@@ -188,7 +188,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.markdown(f"**Dati Fiscali (IRPEF) Socio {i+1}**")
             col_socio1, col_socio2, col_socio3 = st.columns(3)
             socio_data['altri_redditi'] = col_socio1.number_input(f"Altri Redditi IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"ar_{i}")
-            socio_data['oneri_deducibili'] = col_socio2.number_input(f"ONERI DEDUCIBILI (escluso INPS quota socio) Socio {i+1}", value=0.0, format="%.2f", key=f"od_{i}")
+            socio_data['oneri_deducibili'] = col_socio2.number_input(f"ONERI DEDUCIBILI Socio {i+1}", value=0.0, format="%.2f", key=f"od_{i}")
             socio_data['detrazioni_irpef'] = col_socio3.number_input(f"Detrazioni IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"di_{i}")
             socio_data['acconti_versati'] = col_socio1.number_input(f"Acconti IRPEF Versati Socio {i+1}", value=0.0, format="%.2f", key=f"av_{i}")
             socio_data['imposte_gia_trattenute'] = col_socio2.number_input(f"Ritenute Subite Socio {i+1}", value=0.0, format="%.2f", key=f"igt_{i}")
