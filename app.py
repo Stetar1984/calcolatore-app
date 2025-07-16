@@ -167,7 +167,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             col_socio1, col_socio2 = st.columns(2)
             with col_socio1:
                 socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
-                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (escluso INPS quota socio) Socio {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI Socio {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
                 socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEPARATA Socio {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
                 socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE Socio {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             with col_socio2:
