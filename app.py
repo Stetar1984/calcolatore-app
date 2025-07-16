@@ -2,45 +2,42 @@ import streamlit as st
 import pandas as pd
 
 # ==============================================================================
-# --- FUNZIONE DI CALCOLO IRPEF (UNIVERSALE) ---
+# --- FUNZIONI DI CALCOLO ---
 # ==============================================================================
+
 def calcola_irpef(imponibile):
+    """Calcola l'IRPEF lorda basata sugli scaglioni 2024/2025."""
     if imponibile <= 0: return 0
     if imponibile <= 28000: return imponibile * 0.23
     elif imponibile <= 50000: return (28000 * 0.23) + ((imponibile - 28000) * 0.35)
     else: return (28000 * 0.23) + (22000 * 0.35) + ((imponibile - 50000) * 0.43)
 
+def calcola_inps(reddito_imponibile, gestione, minimale, fissi, aliquota):
+    """Calcola i contributi INPS dovuti."""
+    aliquota_dec = aliquota / 100.0
+    if gestione == "Gestione Separata":
+        return reddito_imponibile * aliquota_dec
+    elif gestione in ["Artigiani", "Commercianti"]:
+        if reddito_imponibile <= minimale:
+            return fissi
+        else:
+            contributo_variabile = (reddito_imponibile - minimale) * aliquota_dec
+            return fissi + contributo_variabile
+    return 0
+
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
 # ==============================================================================
-st.set_page_config(layout="wide", page_title="Calcolatore CPB")
-st.title("Calcolatore di Convenienza Concordato Preventivo Biennale")
-
-# ==============================================================================
-# --- DIZIONARIO DELLE DESCRIZIONI AGGIUNTIVE ---
-# ==============================================================================
-descrizioni_aggiuntive = {
-    'reddito_simulato_2024': "CP10 colonna 2",
-    'reddito_rilevante_cpb_2023': "CP1 colonna 2",
-    'reddito_proposto_cpb_2024': "CP1 colonna 1",
-    'reddito_impresa_rettificato_cpb': "CP7 colonna 5",
-    'altri_redditi': "da riepilogo redditi RN + LC2 colonna 1",
-    'oneri_deducibili': "RN3",
-    'cedolare_secca_redditi': "LC2 colonna 1",
-    'imposte_gia_trattenute': "RN33 colonna 4",
-    'imposta_su_cedolare_secca': "LC1 colonna 12/13",
-    'acconti versati': "RN38 colonna 6",
-    'detrazioni IRPEF': "RN22",
-    'valore_produzione_simulato_2024': "IP73 colonna 4",
-    'valore_produzione_irap_rettificato_cpb': "IP74"
-}
+st.set_page_config(layout="wide", page_title="Calcolatore Convenienza CPB")
+st.title("Simulatore di Convenienza Concordato Preventivo Biennale (CPB)")
+st.markdown("Questo strumento confronta il carico fiscale e contributivo totale con e senza l'adesione al CPB.")
 
 # ==============================================================================
 # --- SELETTORE PRINCIPALE ---
 # ==============================================================================
 tipo_calcolo = st.radio(
-    "Seleziona il tipo di calcolo:",
-    ('Ditta Individuale', 'Società in trasparenza fiscale', 'Professionista'),
+    "Seleziona la tipologia di contribuente:",
+    ('Ditta Individuale / Professionista', 'Società in trasparenza fiscale'),
     horizontal=True,
 )
 st.markdown("---")
@@ -48,128 +45,200 @@ st.markdown("---")
 # ==============================================================================
 # --- CALCOLATORE PER DITTA INDIVIDUALE O PROFESSIONISTA ---
 # ==============================================================================
-if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
+if tipo_calcolo == 'Ditta Individuale / Professionista':
     st.header(f"Simulazione per {tipo_calcolo}")
-    
+
     with st.form(f"form_{tipo_calcolo.lower().replace(' ', '_')}"):
-        st.subheader("Dati di Input")
+        st.subheader("Dati Fiscali (IRPEF)")
         col1, col2 = st.columns(2)
 
         with col1:
-            nome_soggetto = st.text_input(f"NOME {tipo_calcolo.upper()}:", value=f'Mio Studio {tipo_calcolo}')
-            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=70000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=65000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
-            punteggio_isa_n_ind = st.slider("Punteggio ISA anno n (2023):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
+            nome_soggetto = st.text_input(f"NOME SOGGETTO:", value=f'Mario Rossi')
+            reddito_simulato_2024 = st.number_input("Reddito Effettivo/Simulato 2024:", value=70000.0, format="%.2f")
+            reddito_proposto_cpb_2024 = st.number_input("Reddito Proposto per CPB 2024:", value=72000.0, format="%.2f")
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
-            cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
-            imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
-            imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-            acconti_versati = st.number_input("ACCONTI VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
-            detrazioni_irpef = st.number_input("DETRAZIONI IRPEF TOTALI (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
-            
+            altri_redditi = st.number_input("Altri Redditi Tassabili IRPEF:", value=0.0, format="%.2f")
+            oneri_deducibili_no_inps = st.number_input("Altri Oneri Deducibili (escluso INPS):", value=2000.0, format="%.2f")
+            detrazioni_irpef = st.number_input("Detrazioni IRPEF Totali:", value=1500.0, format="%.2f")
+            acconti_versati = st.number_input("Acconti IRPEF Versati:", value=10000.0, format="%.2f")
+
+        st.markdown("---")
+        st.subheader("Dati Contributivi (INPS)")
+        col_inps1, col_inps2, col_inps3, col_inps4 = st.columns(4)
+        with col_inps1:
+            gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
+        with col_inps2:
+            aliquota_inps = st.number_input("Aliquota INPS Variabile (%):", value=24.0, format="%.2f", key="aliq_ind")
+        with col_inps3:
+            minimale_inps = st.number_input("Reddito Minimale INPS:", value=18415.0, format="%.2f", key="min_ind")
+        with col_inps4:
+            contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
+
         submitted = st.form_submit_button("Esegui Simulazione")
 
     if submitted:
-        # Calcoli SENZA concordato
-        base_imponibile_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
-        tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb)
-        totale_tassazione_no_cpb = tassazione_no_cpb_irpef - imposte_gia_trattenute + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef
+        # --- CALCOLO CONTRIBUTI INPS ---
+        inps_su_effettivo = calcola_inps(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, aliquota_inps)
+        inps_su_concordato = calcola_inps(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, aliquota_inps)
+
+        # --- CALCOLO SENZA CONCORDATO ---
+        oneri_deducibili_tot_no_cpb = oneri_deducibili_no_inps + inps_su_effettivo
+        base_imponibile_irpef_no_cpb = reddito_simulato_2024 + altri_redditi - oneri_deducibili_tot_no_cpb
+        irpef_lorda_no_cpb = calcola_irpef(base_imponibile_irpef_no_cpb)
+        irpef_netta_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef
+        carico_fiscale_no_cpb = irpef_netta_no_cpb - acconti_versati
+        carico_totale_no_cpb = carico_fiscale_no_cpb + inps_su_effettivo
+
+        # --- CALCOLO CON CONCORDATO (Opzione 1: INPS sul Concordato) ---
+        oneri_deducibili_tot_si_cpb_conc = oneri_deducibili_no_inps + inps_su_concordato
+        base_imponibile_irpef_si_cpb_conc = reddito_proposto_cpb_2024 + altri_redditi - oneri_deducibili_tot_si_cpb_conc
+        irpef_lorda_si_cpb_conc = calcola_irpef(base_imponibile_irpef_si_cpb_conc)
+        irpef_netta_si_cpb_conc = irpef_lorda_si_cpb_conc - detrazioni_irpef
+        carico_fiscale_si_cpb_conc = irpef_netta_si_cpb_conc - acconti_versati
+        carico_totale_si_cpb_concordato = carico_fiscale_si_cpb_conc + inps_su_concordato
+
+        # --- CALCOLO CON CONCORDATO (Opzione 2: INPS sull'Effettivo) ---
+        oneri_deducibili_tot_si_cpb_eff = oneri_deducibili_no_inps + inps_su_effettivo
+        base_imponibile_irpef_si_cpb_eff = reddito_proposto_cpb_2024 + altri_redditi - oneri_deducibili_tot_si_cpb_eff
+        irpef_lorda_si_cpb_eff = calcola_irpef(base_imponibile_irpef_si_cpb_eff)
+        irpef_netta_si_cpb_eff = irpef_lorda_si_cpb_eff - detrazioni_irpef
+        carico_fiscale_si_cpb_eff = irpef_netta_si_cpb_eff - acconti_versati
+        carico_totale_si_cpb_effettivo = carico_fiscale_si_cpb_eff + inps_su_effettivo
         
-        # Calcoli CON concordato
-        base_imponibile_si_cpb = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
-        base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
-        if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
-        if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
-        elif punteggio_isa_n_ind >= 6: aliquota_sostitutiva = 0.12
-        else: aliquota_sostitutiva = 0.15
-        imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
-        tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb)
-        totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef - imposte_gia_trattenute
-        
-        risparmio_fiscale = totale_tassazione_no_cpb - totale_tassazione_si_cpb
-        
+        # --- PRESENTAZIONE RISULTATI ---
         st.markdown(f"<h4>Risultati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
-        df_risultati = pd.DataFrame({"Senza Concordato": [f"{totale_tassazione_no_cpb:,.2f} €"], "Con Concordato": [f"{totale_tassazione_si_cpb:,.2f} €"], "Risparmio/Onere": [f"{risparmio_fiscale:,.2f} €"]}, index=["Carico Fiscale Totale"])
+        df_risultati = pd.DataFrame({
+            "Senza Concordato": [
+                f"{carico_fiscale_no_cpb:,.2f} €",
+                f"{inps_su_effettivo:,.2f} €",
+                f"**{carico_totale_no_cpb:,.2f} €**"
+            ],
+            "Con Concordato (INPS su Concordato)": [
+                f"{carico_fiscale_si_cpb_conc:,.2f} €",
+                f"{inps_su_concordato:,.2f} €",
+                f"**{carico_totale_si_cpb_concordato:,.2f} €**"
+            ],
+            "Con Concordato (INPS su Effettivo)": [
+                f"{carico_fiscale_si_cpb_eff:,.2f} €",
+                f"{inps_su_effettivo:,.2f} €",
+                f"**{carico_totale_si_cpb_effettivo:,.2f} €**"
+            ]
+        }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS)", "CARICO TOTALE"])
         st.table(df_risultati)
+        
+        risparmio1 = carico_totale_no_cpb - carico_totale_si_cpb_concordato
+        risparmio2 = carico_totale_no_cpb - carico_totale_si_cpb_effettivo
+        st.success(f"Risparmio/Onere (INPS su Concordato): {risparmio1:,.2f} €")
+        st.info(f"Risparmio/Onere (INPS su Effettivo): {risparmio2:,.2f} €")
+
 
 #==============================================================================
-# --- CALCOLATORE PER SOCIETÀ DI PERSONE ---
+# --- CALCOLATORE PER SOCIETÀ IN TRASPARENZA ---
 #==============================================================================
 elif tipo_calcolo == 'Società in trasparenza fiscale':
     st.header("Simulazione per Società in trasparenza fiscale")
     
     with st.form("form_societa"):
         st.subheader("Dati Società")
-        col1, col2 = st.columns(2)
-        with col1:
-            nome_societa = st.text_input("NOME SOCIETA':", value='Mia Società S.n.c.')
-            reddito_simulato_2024_soc = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 1):", value=142000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023_soc = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=139872.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO FINI CPB (CP1 colonna 1):", value=151784.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
-            reddito_impresa_rettificato_cpb_soc = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=152420.49, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
-        with col2:
-            valore_produzione_simulato_2024_soc = st.number_input("VALORE PRODUZIONE EFFETTIVO O SIMULATO (IP73 colonna 4):", value=149604.0, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_simulato_2024'))
-            valore_produzione_irap_rettificato_cpb_soc = st.number_input("Valore della produzione IRAP rettificato per CPB (IP74):", value=318210.49, format="%.2f", help=descrizioni_aggiuntive.get('valore_produzione_irap_rettificato_cpb'))
-            punteggio_isa_n_soc = st.slider("Punteggio ISA Società (anno n):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
-        
+        nome_societa = st.text_input("NOME SOCIETA':", value='Mia Società S.n.c.')
+        reddito_simulato_2024_soc = st.number_input("REDDITO EFFETTIVO O SIMULATO SOCIETA':", value=142000.0, format="%.2f")
+        reddito_proposto_cpb_2024_soc = st.number_input("REDDITO PROPOSTO CPB SOCIETA':", value=151784.0, format="%.2f")
+       
         st.markdown("---")
         st.subheader("Dati dei Singoli Soci")
         
-        tabs = st.tabs([f"Socio {i+1}" for i in range(4)])
+        num_soci = st.number_input("Numero di soci da analizzare:", min_value=1, max_value=5, value=2)
         soci_inputs = []
-        for i, tab in enumerate(tabs):
-            with tab:
-                socio_data = {}
-                c1, c2 = st.columns(2)
-                socio_data['nome_socio'] = c1.text_input(f"Nome Socio {i+1}", value=f"Socio {i+1}", key=f"nome_{i}")
-                socio_data['quota_partecipazione'] = c2.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=50.0 if i < 2 else 0.0, format="%.2f", key=f"quota_{i}")
-                col_socio1, col_socio2 = st.columns(2)
-                with col_socio1:
-                    socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1) {i+1}", value=0.0, format="%.2f", key=f"ar_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
-                    socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (RN3) {i+1}", value=0.0, format="%.2f", key=f"od_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
-                    socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1) {i+1}", value=0.0, format="%.2f", key=f"csr_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
-                    socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4) {i+1}", value=0.0, format="%.2f", key=f"igt_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
-                with col_socio2:
-                    socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) {i+1}", value=0.0, format="%.2f", key=f"ics_{i}", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-                    socio_data['acconti versati'] = st.number_input(f"ACCONTI VERSATI (RN38 colonna 6) {i+1}", value=0.0, format="%.2f", key=f"av_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
-                    socio_data['detrazioni IRPEF'] = st.number_input(f"DETRAZIONI IRPEF TOTALI (RN22) {i+1}", value=0.0, format="%.2f", key=f"di_{i}", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
-                soci_inputs.append(socio_data)
+        
+        for i in range(num_soci):
+            st.markdown(f"--- \n ##### Dati Socio {i+1}")
+            socio_data = {}
+            col_socio_nome, col_socio_quota = st.columns(2)
+            socio_data['nome_socio'] = col_socio_nome.text_input(f"Nome Socio {i+1}", value=f"Socio {i+1}", key=f"nome_{i}")
+            socio_data['quota_partecipazione'] = col_socio_quota.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=50.0, format="%.2f", key=f"quota_{i}")
+
+            st.markdown(f"**Dati Fiscali (IRPEF) Socio {i+1}**")
+            col_socio1, col_socio2, col_socio3 = st.columns(3)
+            socio_data['altri_redditi'] = col_socio1.number_input(f"Altri Redditi IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"ar_{i}")
+            socio_data['oneri_deducibili_no_inps'] = col_socio2.number_input(f"Altri Oneri Deducibili (escl. INPS) Socio {i+1}", value=0.0, format="%.2f", key=f"od_{i}")
+            socio_data['detrazioni_irpef'] = col_socio3.number_input(f"Detrazioni IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"di_{i}")
+            socio_data['acconti_versati'] = col_socio1.number_input(f"Acconti IRPEF Versati Socio {i+1}", value=0.0, format="%.2f", key=f"av_{i}")
+
+            st.markdown(f"**Dati Contributivi (INPS) Socio {i+1}**")
+            col_inps_s1, col_inps_s2, col_inps_s3, col_inps_s4 = st.columns(4)
+            socio_data['gestione_inps'] = col_inps_s1.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
+            socio_data['aliquota_inps'] = col_inps_s2.number_input("Aliquota INPS Variabile (%):", value=24.0, format="%.2f", key=f"aliq_soc_{i}")
+            socio_data['minimale_inps'] = col_inps_s3.number_input("Reddito Minimale INPS:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
+            socio_data['contributi_fissi'] = col_inps_s4.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
+
+            soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
 
     if submitted_soc:
-        st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
-        aliquota_irap = 0.039; irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap; irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap; risparmio_irap = irap_no_cpb - irap_si_cpb
-        df_irap = pd.DataFrame({"Senza Concordato": [irap_no_cpb], "Con Concordato": [irap_si_cpb], "Risparmio/Onere IRAP": [risparmio_irap]}, index=["Imposta IRAP Dovuta"]); st.table(df_irap.style.format("{:,.2f} €"))
-        st.markdown("---"); st.subheader("Parte 2: Analisi IRPEF per i Singoli Soci")
+        st.markdown("---")
+        st.header(f"Risultati Simulazione per {nome_societa}")
         
         for i, socio in enumerate(soci_inputs):
             perc_socio = socio['quota_partecipazione'] / 100.0
             if perc_socio == 0: continue
             
-            st.markdown(f"<h4>Riepilogo per: {socio['nome_socio']} (Quota: {socio['quota_partecipazione']:.2f}%)</h4>", unsafe_allow_html=True)
-            quota_reddito_simulato = reddito_simulato_2024_soc * perc_socio; quota_reddito_rilevante = reddito_rilevante_cpb_2023_soc * perc_socio; quota_reddito_proposto = reddito_proposto_cpb_2024_soc * perc_socio; quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
-            base_imponibile_no_cpb = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili']- socio['cedolare_secca_redditi']
-            irpef_ordinaria_no_cpb = calcola_irpef(base_imponibile_no_cpb)
-            carico_fiscale_no_cpb = irpef_ordinaria_no_cpb - socio['imposte_gia_trattenute'] + socio['imposta_su_cedolare_secca'] - socio['acconti versati'] - socio['detrazioni IRPEF']
-            base_imponibile_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
-            if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
-            if punteggio_isa_n_soc >= 8: aliquota_sostitutiva = 0.10
-            elif punteggio_isa_n_soc >= 6: aliquota_sostitutiva = 0.12
-            else: aliquota_sostitutiva = 0.15
-            imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
-            base_imponibile_si_cpb = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['cedolare_secca_redditi'] - socio['oneri_deducibili']
-            tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb)
-            carico_fiscale_concordato = imposta_sostitutiva + tass_ordinaria_si_cpb + socio['imposta_su_cedolare_secca'] - socio['acconti versati'] - socio['detrazioni IRPEF'] - socio['imposte_gia_trattenute']
-            risparmio = carico_fiscale_no_cpb - carico_fiscale_concordato
+            st.markdown(f"### Riepilogo per: {socio['nome_socio']} (Quota: {socio['quota_partecipazione']:.2f}%)")
             
-            df_socio = pd.DataFrame({"Senza Concordato": [f"{carico_fiscale_no_cpb:,.2f} €"], "Con Concordato": [f"{carico_fiscale_concordato:,.2f} €"], "Risparmio/Onere": [f"{risparmio:,.2f} €"]}, index=["Carico Fiscale del Socio"]); st.table(df_socio)
+            quota_reddito_simulato = reddito_simulato_2024_soc * perc_socio
+            quota_reddito_concordato = reddito_proposto_cpb_2024_soc * perc_socio
+            
+            # Calcoli INPS
+            inps_su_effettivo = calcola_inps(quota_reddito_simulato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['aliquota_inps'])
+            inps_su_concordato = calcola_inps(quota_reddito_concordato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['aliquota_inps'])
+
+            # Calcolo SENZA Concordato
+            oneri_deducibili_tot_no_cpb = socio['oneri_deducibili_no_inps'] + inps_su_effettivo
+            base_imponibile_irpef_no_cpb = quota_reddito_simulato + socio['altri_redditi'] - oneri_deducibili_tot_no_cpb
+            irpef_lorda_no_cpb = calcola_irpef(base_imponibile_irpef_no_cpb)
+            irpef_netta_no_cpb = irpef_lorda_no_cpb - socio['detrazioni_irpef']
+            carico_fiscale_no_cpb = irpef_netta_no_cpb - socio['acconti_versati']
+            carico_totale_no_cpb = carico_fiscale_no_cpb + inps_su_effettivo
+
+            # Calcolo CON Concordato (Opzione 1: INPS su Concordato)
+            oneri_deducibili_tot_si_cpb_conc = socio['oneri_deducibili_no_inps'] + inps_su_concordato
+            base_imponibile_irpef_si_cpb_conc = quota_reddito_concordato + socio['altri_redditi'] - oneri_deducibili_tot_si_cpb_conc
+            irpef_lorda_si_cpb_conc = calcola_irpef(base_imponibile_irpef_si_cpb_conc)
+            irpef_netta_si_cpb_conc = irpef_lorda_si_cpb_conc - socio['detrazioni_irpef']
+            carico_fiscale_si_cpb_conc = irpef_netta_si_cpb_conc - socio['acconti_versati']
+            carico_totale_si_cpb_concordato = carico_fiscale_si_cpb_conc + inps_su_concordato
+
+            # Calcolo CON Concordato (Opzione 2: INPS su Effettivo)
+            oneri_deducibili_tot_si_cpb_eff = socio['oneri_deducibili_no_inps'] + inps_su_effettivo
+            base_imponibile_irpef_si_cpb_eff = quota_reddito_concordato + socio['altri_redditi'] - oneri_deducibili_tot_si_cpb_eff
+            irpef_lorda_si_cpb_eff = calcola_irpef(base_imponibile_irpef_si_cpb_eff)
+            irpef_netta_si_cpb_eff = irpef_lorda_si_cpb_eff - socio['detrazioni_irpef']
+            carico_fiscale_si_cpb_eff = irpef_netta_si_cpb_eff - socio['acconti_versati']
+            carico_totale_si_cpb_effettivo = carico_fiscale_si_cpb_eff + inps_su_effettivo
+
+            # Presentazione risultati per il socio
+            df_socio = pd.DataFrame({
+                "Senza Concordato": [
+                    f"{carico_fiscale_no_cpb:,.2f} €",
+                    f"{inps_su_effettivo:,.2f} €",
+                    f"**{carico_totale_no_cpb:,.2f} €**"
+                ],
+                "Con Concordato (INPS su Concordato)": [
+                    f"{carico_fiscale_si_cpb_conc:,.2f} €",
+                    f"{inps_su_concordato:,.2f} €",
+                    f"**{carico_totale_si_cpb_concordato:,.2f} €**"
+                ],
+                "Con Concordato (INPS su Effettivo)": [
+                    f"{carico_fiscale_si_cpb_eff:,.2f} €",
+                    f"{inps_su_effettivo:,.2f} €",
+                    f"**{carico_totale_si_cpb_effettivo:,.2f} €**"
+                ]
+            }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS)", "CARICO TOTALE"])
+            st.table(df_socio)
+
+            risparmio1 = carico_totale_no_cpb - carico_totale_si_cpb_concordato
+            risparmio2 = carico_totale_no_cpb - carico_totale_si_cpb_effettivo
+            st.success(f"Risparmio/Onere Socio (Opzione INPS su Concordato): {risparmio1:,.2f} €")
+            st.info(f"Risparmio/Onere Socio (Opzione INPS su Effettivo): {risparmio2:,.2f} €")
             st.markdown("---")
-
-
-
