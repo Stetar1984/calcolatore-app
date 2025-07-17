@@ -129,8 +129,8 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
     if submitted:
         # --- CALCOLO IMPONIBILI IRPEF ---
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili
-        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
         
         # --- CALCOLO ADDIZIONALI ---
         addizionale_regionale_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_add_regionale / 100.0)
@@ -155,11 +155,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         inps_dovuti_concordato = calcola_inps(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
 
         # --- CALCOLO ACCONTI ---
-        irpef_netta_no_cpb_per_acconti = tassazione_lorda_no_cpb - detrazioni_irpef
+        irpef_netta_no_cpb_per_acconti = calcola_irpef(base_imponibile_no_cpb_irpef) - detrazioni_irpef
         acconto_irpef_no_cpb = irpef_netta_no_cpb_per_acconti * 0.50
         acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
         
-        irpef_netta_si_cpb_per_acconti = tassazione_lorda_si_cpb - detrazioni_irpef
+        irpef_netta_si_cpb_per_acconti = calcola_irpef(base_imponibile_si_cpb_irpef) - detrazioni_irpef
         acconto_irpef_si_cpb = irpef_netta_si_cpb_per_acconti * 0.50
         acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
 
