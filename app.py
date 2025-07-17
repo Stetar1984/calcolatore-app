@@ -126,7 +126,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         # Calcoli fiscali come da codice originale
         base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
         tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb_irpef)
-        totale_tassazione_no_cpb = tassazione_no_cpb_irpef - imposte_gia_trattenute + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef
+        totale_tassazione_no_cpb = tassazione_no_cpb_irpef + imposta_su_cedolare_secca
         
         base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
@@ -136,7 +136,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         else: aliquota_sostitutiva = 0.15
         imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
         tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-        totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca - acconti_versati - detrazioni_irpef - imposte_gia_trattenute
+        totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca
         
         # Calcoli contributivi INPS
         inps_su_effettivo = calcola_inps(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
@@ -260,7 +260,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             # Calcoli fiscali come da codice originale (INVARIATI)
             base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             irpef_ordinaria_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
-            carico_fiscale_no_cpb = irpef_ordinaria_no_cpb - socio['imposte_gia_trattenute'] + socio['imposta_su_cedolare_secca'] - socio['acconti_versati'] - socio['detrazioni_irpef']
+            carico_fiscale_no_cpb = irpef_ordinaria_no_cpb + socio['imposta_su_cedolare_secca']
 
             base_imponibile_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
             if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
@@ -270,7 +270,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
             base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-            carico_fiscale_concordato = imposta_sostitutiva + tass_ordinaria_si_cpb + socio['imposta_su_cedolare_secca'] - socio['acconti_versati'] - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
+            carico_fiscale_concordato = imposta_sostitutiva + tass_ordinaria_si_cpb + socio['imposta_su_cedolare_secca']
 
             # Calcoli contributivi INPS
             inps_su_effettivo = calcola_inps(quota_reddito_simulato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
