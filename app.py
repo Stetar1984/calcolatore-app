@@ -144,8 +144,8 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         # Calcoli totali
         carico_totale_no_cpb = totale_tassazione_no_cpb + inps_su_effettivo - contributi_fissi
-        carico_totale_si_cpb_concordato = totale_tassazione_si_cpb + inps_su_concordato - contributi fissi
-        carico_totale_si_cpb_effettivo = totale_tassazione_si_cpb + inps_su_effettivo - contributi fissi
+        carico_totale_si_cpb_concordato = totale_tassazione_si_cpb + inps_su_concordato - contributi_fissi
+        carico_totale_si_cpb_effettivo = totale_tassazione_si_cpb + inps_su_effettivo - contributi_fissi
         
         # --- TABELLA DI OUTPUT DETTAGLIATA ---
         st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
