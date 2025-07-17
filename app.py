@@ -179,7 +179,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
              "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**"],
              "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**"],
              "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**"],
-        }, index=["Saldo IRPEF a Debito/Credito", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
+        }, index=["Saldo IRPEF a Debito/Credito + imp. sost. CPB", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
         st.table(df_saldi)
         
         risparmio_concordato = carico_totale_no_cpb - carico_totale_si_cpb_concordato
@@ -322,7 +322,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**"],
                 "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**"],
                 "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**"],
-            }, index=["Saldo IRPEF a Debito/Credito", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
+            }, index=["Saldo IRPEF a Debito/Credito + imp. sost. CPB", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
             st.table(df_saldi_socio)
 
             risparmio1 = carico_totale_no_cpb - carico_totale_si_cpb_concordato
