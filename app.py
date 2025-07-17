@@ -286,7 +286,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 "Senza Concordato": [ f"{carico_fiscale_no_cpb:,.2f} €", f"{inps_su_effettivo:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**" ],
                 "Con Concordato (INPS su Concordato)": [ f"{carico_fiscale_concordato:,.2f} €", f"{inps_su_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**" ],
                 "Con Concordato (INPS su Effettivo)": [ f"{carico_fiscale_concordato:,.2f} €", f"{inps_su_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**" ]
-            }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS)", "CARICO TOTALE (Fisco + INPS)"])
+            }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS) al lordo dei minimali già versati", "CARICO TOTALE (Fisco + INPS)"])
             st.table(df_socio)
 
             risparmio1 = carico_totale_no_cpb - carico_totale_si_cpb_concordato
