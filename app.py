@@ -164,10 +164,14 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         
         # Calcolo Acconti IRPEF e Comunale
-        acconto_irpef_no_cpb = [calcola_irpef(base_imponibile_no_cpb_irpef) - detrazioni_irpef] * 0.50
-        acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
-        acconto_irpef_si_cpb = [calcola_irpef(base_imponibile_si_cpb_irpef) - detrazioni_irpef] * 0.50
-        acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
+    
+        irpef_netta_no_cpb_per_acconti = calcola_irpef(base_imponibile_no_cpb_irpef) - socio['detrazioni_irpef']
+        acconto_irpef_no_cpb = irpef_netta_no_cpb_per_acconti * 0.50
+        acconto_comunale_no_cpb = (base_imponibile_no_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)) * (socio['aliquota_acconto_comunale'] / 100.0)
+
+        irpef_netta_si_cpb_per_acconti = calcola_irpef(base_imponibile_si_cpb_irpef) - socio['detrazioni_irpef']
+        acconto_irpef_si_cpb = irpef_netta_si_cpb_per_acconti * 0.50
+        acconto_comunale_si_cpb = (base_imponibile_si_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)) * (socio['aliquota_acconto_comunale'] / 100.0)
 
         # Calcolo Acconti INPS
         base_acconto_inps_no_cpb = reddito_simulato_2024 - imponibile_minimale_acconti_2025
