@@ -170,7 +170,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             "Senza Concordato": [ f"{tassazione_lorda_no_cpb:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_no_cpb + inps_dovuti_effettivo:,.2f} €**" ],
             "Con Concordato (INPS su Concordato)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_concordato:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_concordato:,.2f} €**" ],
             "Con Concordato (INPS su Effettivo)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_effettivo:,.2f} €**" ]
-        }, index=["Carico Lordo Fiscale (IRPEF+Add.)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
+        }, index=["Carico Lordo Fiscale (IRPEF+Add.+imp.sost.CPB)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
         st.table(df_risultati)
 
         st.markdown("---")
@@ -314,7 +314,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 "Senza Concordato": [ f"{tassazione_lorda_no_cpb_irpef:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_no_cpb_irpef + inps_dovuti_effettivo:,.2f} €**" ],
                 "Con Concordato (INPS su Concordato)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_concordato:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_concordato:,.2f} €**" ],
                 "Con Concordato (INPS su Effettivo)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_effettivo:,.2f} €**" ]
-            }, index=["Carico Lordo Fiscale (IRPEF+Add.)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
+            }, index=["Carico Lordo Fiscale (IRPEF+Add.+imp.sost.CPB)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
             st.table(df_socio_lordo)
 
             st.markdown(f"**Riepilogo Saldi Finali da Versare Socio {i+1}**")
