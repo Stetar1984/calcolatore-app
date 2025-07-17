@@ -98,11 +98,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col2:
             altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (escluso INPS) (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
             cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA O TASS. SEPARATA (LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
             imposte_gia_trattenute = st.number_input("IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-            acconti_versati = st.number_input("ACCONTI VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
+            acconti_versati = st.number_input("ACCONTI IRPEF VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
             detrazioni_irpef = st.number_input("DETRAZIONI IRPEF TOTALI (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
             
         st.markdown("---")
@@ -113,6 +113,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         with col_inps1:
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
             minimale_inps = st.number_input("Reddito Minimale INPS:", value=18415.0, format="%.2f", key="min_ind")
+            acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
         with col_inps2:
             scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS:", value=55008.0, format="%.2f", key="cap1_ind")
             aliquota_inps1 = st.number_input("Aliquota 1° Scaglione (%):", value=24.0, format="%.2f", key="aliq1_ind")
@@ -123,12 +124,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         submitted = st.form_submit_button("Esegui Simulazione")
 
     if submitted:
-        # Calcoli fiscali come da codice originale
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
-        tassazione_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb_irpef)
-        totale_tassazione_no_cpb = tassazione_no_cpb_irpef + imposta_su_cedolare_secca
+        # --- CALCOLI FISCALI (Logica originale mantenuta) ---
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili 
+        tassazione_lorda_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb_irpef)
         
-        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - cedolare_secca_redditi - oneri_deducibili
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
         if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
         if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
@@ -136,42 +136,62 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         else: aliquota_sostitutiva = 0.15
         imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
         tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-        totale_tassazione_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + imposta_su_cedolare_secca
+        tassazione_lorda_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb
         
-        # Calcoli contributivi INPS
-        inps_su_effettivo = calcola_inps(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        inps_su_concordato = calcola_inps(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        # --- CALCOLO CONTRIBUTI INPS ---
+        inps_dovuti_effettivo = calcola_inps(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_concordato = calcola_inps(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
 
-        # Calcoli totali
-        carico_totale_no_cpb = totale_tassazione_no_cpb + inps_su_effettivo
-        carico_totale_si_cpb_concordato = totale_tassazione_si_cpb + inps_su_concordato
-        carico_totale_si_cpb_effettivo = totale_tassazione_si_cpb + inps_su_effettivo
+        # --- CALCOLO SALDI E TOTALI ---
+        # Senza Concordato
+        saldo_irpef_no_cpb = tassazione_lorda_no_cpb_irpef - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
+        saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
+        carico_totale_no_cpb = saldo_irpef_no_cpb + saldo_inps_no_cpb
+
+        # Con Concordato (INPS su Concordato)
+        saldo_irpef_si_cpb = tassazione_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
+        saldo_inps_si_cpb_concordato = inps_dovuti_concordato - contributi_fissi - acconti_inps_versati
+        carico_totale_si_cpb_concordato = saldo_irpef_si_cpb + saldo_inps_si_cpb_concordato
         
-        # --- TABELLA DI OUTPUT DETTAGLIATA ---
+        # Con Concordato (INPS su Effettivo)
+        saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
+        carico_totale_si_cpb_effettivo = saldo_irpef_si_cpb + saldo_inps_si_cpb_effettivo
+
+        # --- PRESENTAZIONE RISULTATI ---
         st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
         df_risultati = pd.DataFrame({
             "Senza Concordato": [
-                f"{totale_tassazione_no_cpb:,.2f} €",
-                f"{inps_su_effettivo:,.2f} €",
-                f"**{carico_totale_no_cpb:,.2f} €**"
+                f"{tassazione_lorda_no_cpb_irpef:,.2f} €",
+                f"{inps_dovuti_effettivo:,.2f} €",
+                f"**{tassazione_lorda_no_cpb_irpef + inps_dovuti_effettivo:,.2f} €**"
             ],
             "Con Concordato (INPS su Concordato)": [
-                f"{totale_tassazione_si_cpb:,.2f} €",
-                f"{inps_su_concordato:,.2f} €",
-                f"**{carico_totale_si_cpb_concordato:,.2f} €**"
+                f"{tassazione_lorda_si_cpb:,.2f} €",
+                f"{inps_dovuti_concordato:,.2f} €",
+                f"**{tassazione_lorda_si_cpb + inps_dovuti_concordato:,.2f} €**"
             ],
             "Con Concordato (INPS su Effettivo)": [
-                f"{totale_tassazione_si_cpb:,.2f} €",
-                f"{inps_su_effettivo:,.2f} €",
-                f"**{carico_totale_si_cpb_effettivo:,.2f} €**"
+                f"{tassazione_lorda_si_cpb:,.2f} €",
+                f"{inps_dovuti_effettivo:,.2f} €",
+                f"**{tassazione_lorda_si_cpb + inps_dovuti_effettivo:,.2f} €**"
             ]
-        }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS) ", "CARICO TOTALE (Fisco + INPS) "])
+        }, index=["Carico Lordo Fiscale (IRPEF)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
         st.table(df_risultati)
+
+        st.markdown("---")
+        st.subheader("Riepilogo Saldi Finali da Versare")
+        df_saldi = pd.DataFrame({
+             "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**"],
+             "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**"],
+             "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**"],
+        }, index=["Saldo IRPEF a Debito/Credito", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
+        st.table(df_saldi)
         
         risparmio_concordato = carico_totale_no_cpb - carico_totale_si_cpb_concordato
         risparmio_effettivo = carico_totale_no_cpb - carico_totale_si_cpb_effettivo
-        st.success(f"Risparmio/Onere scegliendo 'INPS su Concordato': {risparmio_concordato:,.2f} €")
-        st.info(f"Risparmio/Onere scegliendo 'INPS su Effettivo': {risparmio_effettivo:,.2f} €")
+        st.success(f"Risparmio/Onere Totale Scegliendo 'INPS su Concordato': {risparmio_concordato:,.2f} €")
+        st.info(f"Risparmio/Onere Totale Scegliendo 'INPS su Effettivo': {risparmio_effettivo:,.2f} €")
+
 
 #==============================================================================
 # --- CALCOLATORE PER SOCIETÀ IN TRASPARENZA ---
@@ -180,7 +200,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
     st.header("Simulazione per Società in trasparenza fiscale")
     
     with st.form("form_societa"):
-        # --- INPUT SOCIETA' (INVARIATI) ---
         st.subheader("Dati Società")
         col1_soc, col2_soc = st.columns(2)
         with col1_soc:
@@ -207,39 +226,38 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             socio_data['nome_socio'] = col_socio_nome.text_input(f"Nome Socio {i+1}", value=f"Socio {i+1}", key=f"nome_{i}")
             socio_data['quota_partecipazione'] = col_socio_quota.number_input(f"Quota di Partecipazione (%) Socio {i+1}", value=(50.0 if i < 2 else 0.0), format="%.2f", key=f"quota_{i}")
 
-            # --- SEZIONE INPUT FISCALI PER SOCIO (MODIFICATA) ---
             st.markdown(f"**Dati Fiscali Personali (IRPEF) Socio {i+1}**")
             col_socio1, col_socio2 = st.columns(2)
             with col_socio1:
                 socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"ar_soc_{i}", help=descrizioni_aggiuntive.get('altri_redditi'))
-                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI Socio {i+1}", value=0.0, format="%.2f", key=f"od_soc_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (escluso INPS quota socio) Socio {i+1}", value=0.0, format="%.2f", key=f"od_soc_{i}", help=descrizioni_aggiuntive.get('oneri_deducibili'))
                 socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA O TASS. SEPARATA Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
                 socio_data['imposte_gia_trattenute'] = st.number_input(f"IMPOSTE SU REDDITI GIA' TASSATI E RITENUTE Socio {i+1}", value=0.0, format="%.2f", key=f"igt_soc_{i}", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             with col_socio2:
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-                socio_data['acconti_versati'] = st.number_input(f"ACCONTI VERSATI Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
+                socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}", help=descrizioni_aggiuntive.get('acconti versati'))
                 socio_data['detrazioni_irpef'] = st.number_input(f"DETRAZIONI IRPEF TOTALI Socio {i+1}", value=0.0, format="%.2f", key=f"di_soc_{i}", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
 
-            # --- SEZIONE INPUT INPS PER SOCIO (INVARIATA) ---
             st.markdown(f"**Dati Contributivi (INPS) Socio {i+1}**")
-            col_inps_s1, col_inps_s2, col_inps_s3 = st.columns(3)
+            col_inps_s1, col_inps_s2, col_inps_s3, col_inps_s4 = st.columns(4)
             with col_inps_s1:
                 socio_data['gestione_inps'] = col_inps_s1.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
-                socio_data['contributi_fissi'] = col_inps_s1.number_input(f"Contributi Fissi INPS Versati Socio {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
             with col_inps_s2:
-                 socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
-                 socio_data['aliquota_inps2'] = col_inps_s2.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
+                socio_data['contributi_fissi'] = col_inps_s2.number_input(f"Contributi Fissi INPS Versati Socio {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
             with col_inps_s3:
-                socio_data['minimale_inps'] = col_inps_s3.number_input(f"Reddito Minimale INPS Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
-                socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
-                socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
+                socio_data['aliquota_inps1'] = col_inps_s3.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
+                socio_data['aliquota_inps2'] = col_inps_s3.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
+            with col_inps_s4:
+                socio_data['minimale_inps'] = col_inps_s4.number_input(f"Reddito Minimale INPS Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
+                socio_data['scaglione1_cap_inps'] = col_inps_s4.number_input(f"Cap 1° Scaglione INPS Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
+                socio_data['massimale_inps'] = col_inps_s4.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
+                socio_data['acconti_inps_versati'] = col_inps_s4.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
             
             soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
 
     if submitted_soc:
-        # CALCOLO IRAP (INVARIATO)
         st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
         aliquota_irap = 0.039; irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap; irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap; risparmio_irap = irap_no_cpb - irap_si_cpb
         df_irap = pd.DataFrame({"Senza Concordato": [f"{irap_no_cpb:,.2f} €"], "Con Concordato": [f"{irap_si_cpb:,.2f} €"], "Risparmio/Onere IRAP": [f"{risparmio_irap:,.2f} €"]}, index=["Imposta IRAP Dovuta"]); st.table(df_irap)
@@ -257,11 +275,10 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             quota_reddito_proposto = reddito_proposto_cpb_2024_soc * perc_socio
             quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
 
-            # Calcoli fiscali come da codice originale (INVARIATI)
+            # Calcoli fiscali
             base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
-            irpef_ordinaria_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
-            carico_fiscale_no_cpb = irpef_ordinaria_no_cpb + socio['imposta_su_cedolare_secca']
-
+            tassazione_lorda_no_cpb_irpef = calcola_irpef(base_imponibile_no_cpb_irpef)
+            
             base_imponibile_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
             if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
             if punteggio_isa_n_soc >= 8: aliquota_sostitutiva = 0.10
@@ -270,27 +287,43 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
             base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             tass_ordinaria_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-            carico_fiscale_concordato = imposta_sostitutiva + tass_ordinaria_si_cpb + socio['imposta_su_cedolare_secca']
+            tassazione_lorda_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb
 
             # Calcoli contributivi INPS
-            inps_su_effettivo = calcola_inps(quota_reddito_simulato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
-            inps_su_concordato = calcola_inps(quota_reddito_proposto, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
+            inps_dovuti_effettivo = calcola_inps(quota_reddito_simulato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
+            inps_dovuti_concordato = calcola_inps(quota_reddito_proposto, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
             
-            # Calcoli totali
-            carico_totale_no_cpb = carico_fiscale_no_cpb + inps_su_effettivo
-            carico_totale_si_cpb_concordato = carico_fiscale_concordato + inps_su_concordato
-            carico_totale_si_cpb_effettivo = carico_fiscale_concordato + inps_su_effettivo
+            # Calcolo Saldi
+            saldo_irpef_no_cpb = tassazione_lorda_no_cpb_irpef - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
+            saldo_inps_no_cpb = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            carico_totale_no_cpb = saldo_irpef_no_cpb + saldo_inps_no_cpb
 
-            # Tabella di output per il socio
+            saldo_irpef_si_cpb = tassazione_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
+            saldo_inps_si_cpb_concordato = inps_dovuti_concordato - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            carico_totale_si_cpb_concordato = saldo_irpef_si_cpb + saldo_inps_si_cpb_concordato
+
+            saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            carico_totale_si_cpb_effettivo = saldo_irpef_si_cpb + saldo_inps_si_cpb_effettivo
+            
+            # --- TABELLA DI OUTPUT DETTAGLIATA PER SOCIO ---
+            st.markdown(f"**Riepilogo Carichi Lordi Socio {i+1}**")
             df_socio = pd.DataFrame({
-                "Senza Concordato": [ f"{carico_fiscale_no_cpb:,.2f} €", f"{inps_su_effettivo:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**" ],
-                "Con Concordato (INPS su Concordato)": [ f"{carico_fiscale_concordato:,.2f} €", f"{inps_su_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**" ],
-                "Con Concordato (INPS su Effettivo)": [ f"{carico_fiscale_concordato:,.2f} €", f"{inps_su_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**" ]
-            }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS) ", "CARICO TOTALE (Fisco + INPS) "])
+                "Senza Concordato": [ f"{tassazione_lorda_no_cpb_irpef:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_no_cpb_irpef + inps_dovuti_effettivo:,.2f} €**" ],
+                "Con Concordato (INPS su Concordato)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_concordato:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_concordato:,.2f} €**" ],
+                "Con Concordato (INPS su Effettivo)": [ f"{tassazione_lorda_si_cpb:,.2f} €", f"{inps_dovuti_effettivo:,.2f} €", f"**{tassazione_lorda_si_cpb + inps_dovuti_effettivo:,.2f} €**" ]
+            }, index=["Carico Lordo Fiscale (IRPEF)", "Carico Lordo Contributivo (INPS)", "CARICO LORDO TOTALE"])
             st.table(df_socio)
+
+            st.markdown(f"**Riepilogo Saldi Finali da Versare Socio {i+1}**")
+            df_saldi_socio = pd.DataFrame({
+                "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"**{carico_totale_no_cpb:,.2f} €**"],
+                "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"**{carico_totale_si_cpb_concordato:,.2f} €**"],
+                "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"**{carico_totale_si_cpb_effettivo:,.2f} €**"],
+            }, index=["Saldo IRPEF a Debito/Credito", "Saldo INPS a Debito/Credito", "SALDO TOTALE A DEBITO/CREDITO"])
+            st.table(df_saldi_socio)
 
             risparmio1 = carico_totale_no_cpb - carico_totale_si_cpb_concordato
             risparmio2 = carico_totale_no_cpb - carico_totale_si_cpb_effettivo
-            st.success(f"Risparmio/Onere Socio (Opzione INPS su Concordato): {risparmio1:,.2f} €")
-            st.info(f"Risparmio/Onere Socio (Opzione INPS su Effettivo): {risparmio2:,.2f} €")
+            st.success(f"Risparmio/Onere Totale Socio (Opzione INPS su Concordato): {risparmio1:,.2f} €")
+            st.info(f"Risparmio/Onere Totale Socio (Opzione INPS su Effettivo): {risparmio2:,.2f} €")
             st.markdown("---")
