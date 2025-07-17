@@ -165,7 +165,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
                 f"{inps_su_effettivo:,.2f} €",
                 f"**{carico_totale_si_cpb_effettivo:,.2f} €**"
             ]
-        }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS)", "CARICO TOTALE (Fisco + INPS)"])
+        }, index=["Carico Fiscale (Saldo IRPEF)", "Carico Contributivo (INPS) al lordo dei minimali già versati ", "CARICO TOTALE (Fisco + INPS)"])
         st.table(df_risultati)
         
         risparmio_concordato = carico_totale_no_cpb - carico_totale_si_cpb_concordato
