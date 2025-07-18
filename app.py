@@ -340,7 +340,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             tassazione_lorda_no_cpb = irpef_lorda_no_cpb
             saldo_irpef_no_cpb = tassazione_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
             
-            tassazione_lorda_si_cpb = imposta_sostitutiva + irpef_lorda_si_cpb + addizionale_regionale_socio_si_cpb + addizionale_comunale_socio_si_cpb + socio['imposta_su_cedolare_secca']
+            tassazione_lorda_si_cpb =  irpef_lorda_si_cpb
             saldo_irpef_si_cpb = tassazione_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
             
             # Calcoli Contributivi e Saldo INPS
