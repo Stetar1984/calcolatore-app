@@ -321,7 +321,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             tassazione_lorda_si_cpb = imposta_sostitutiva + tass_ordinaria_si_cpb + addizionali_socio_si_cpb + socio['imposta_su_cedolare_secca']
 
             # Calcolo Acconti IRPEF e Comunale
-            irpef_netta_no_cpb_per_acconti = calcola_irpef(base_imponibile_no_cpb_irpef) - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
+            irpef_netta_no_cpb_per_acconti = calcola_irpef(base_imponibile_no_cpb_irpef) - socio['detrazioni_irpef']
             acconto_irpef_no_cpb = irpef_netta_no_cpb_per_acconti * 0.50
             acconto_comunale_no_cpb = (base_imponibile_no_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)) * (socio['aliquota_acconto_comunale'] / 100.0)
 
