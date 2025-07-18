@@ -323,7 +323,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             # Calcolo Acconti IRPEF e Comunale
             irpef_netta_no_cpb_per_acconti = calcola_irpef(base_imponibile_no_cpb_irpef) - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
             acconto_irpef_no_cpb = irpef_netta_no_cpb_per_acconti * 0.50
-            acconto_comunale_no_cpb = (base_imponibile_no_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)) * (socio['aliquota_acconto_comunale'] / 100.0))
+            acconto_comunale_no_cpb = (base_imponibile_no_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)) * (socio['aliquota_acconto_comunale'] / 100.0)
 
             irpef_netta_si_cpb_per_acconti = calcola_irpef(base_imponibile_si_cpb_irpef) - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
             acconto_irpef_si_cpb = irpef_netta_si_cpb_per_acconti * 0.50
