@@ -319,8 +319,8 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
 
             # Calcoli imponibili e addizionali
-            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili']
-            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili']
+            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
+            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
             addizionale_regionale_socio_no_cpb = base_imponibile_no_cpb_irpef * (socio['aliquota_add_regionale'] / 100.0)
@@ -337,7 +337,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             addizionale_comunale_socio_si_cpb = base_imponibile_si_cpb_irpef * (socio['aliquota_add_comunale'] / 100.0)
 
             # Calcolo Tassazione Lorda e Saldo IRPEF
-            tassazione_lorda_no_cpb = irpef_lorda_no_cpb + addizionale_regionale_socio_no_cpb + addizionale_comunale_socio_no_cpb + socio['imposta_su_cedolare_secca']
+            tassazione_lorda_no_cpb = irpef_lorda_no_cpb
             saldo_irpef_no_cpb = tassazione_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
             
             tassazione_lorda_si_cpb = imposta_sostitutiva + irpef_lorda_si_cpb + addizionale_regionale_socio_si_cpb + addizionale_comunale_socio_si_cpb + socio['imposta_su_cedolare_secca']
