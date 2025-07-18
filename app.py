@@ -179,7 +179,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         totale_acconto_inps_no_cpb = base_acconto_inps_no_cpb * (aliquota_inps1 / 100) # Usiamo l'aliquota del primo scaglione per l'acconto
         acconto_1_inps_no_cpb = totale_acconto_inps_no_cpb * 0.50
         acconto_2_inps_no_cpb = totale_acconto_inps_no_cpb * 0.50
-        
+    
         base_acconto_inps_si_cpb = reddito_proposto_cpb_2024 - imponibile_minimale_acconti_2025
         if base_acconto_inps_si_cpb < 0: base_acconto_inps_si_cpb = 0
         totale_acconto_inps_si_cpb = base_acconto_inps_si_cpb * (aliquota_inps1 / 100)
