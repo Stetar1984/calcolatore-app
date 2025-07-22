@@ -168,9 +168,82 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         submitted = st.form_submit_button("Esegui Simulazione")
 
-    if submitted:
-        # Codice di calcolo e output per Ditta Individuale/Professionista
-        pass
+
+
+
+
+if submitted:
+        # Calcolo imponibili IRPEF
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
+        
+        # Calcolo IRPEF lorda
+        irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
+        
+        base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
+        if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
+        if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
+        elif punteggio_isa_n_ind >= 6: aliquota_sostitutiva = 0.12
+        else: aliquota_sostitutiva = 0.15
+        imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
+        irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
+
+        # Calcolo Addizionali
+        addizionale_regionale_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_add_regionale / 100.0)
+        addizionale_comunale_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_add_comunale / 100.0)
+        addizionale_regionale_si_cpb = base_imponibile_si_cpb_irpef * (aliquota_add_regionale / 100.0)
+        addizionale_comunale_si_cpb = base_imponibile_si_cpb_irpef * (aliquota_add_comunale / 100.0)
+        
+        # Calcolo Contributi INPS
+        inps_dovuti_effettivo = calcola_inps_saldo(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        
+        # Calcolo Saldo IRPEF
+        saldo_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
+        saldo_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
+        
+        # Calcolo Saldo Addizionali
+        saldo_add_regionale_no_cpb = addizionale_regionale_no_cpb
+        saldo_add_comunale_no_cpb = addizionale_comunale_no_cpb - addizionale_comunale_trattenuta
+        saldo_add_regionale_si_cpb = addizionale_regionale_si_cpb
+        saldo_add_comunale_si_cpb = addizionale_comunale_si_cpb - addizionale_comunale_trattenuta
+        
+        # Calcolo Saldo INPS
+        saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
+        saldo_inps_si_cpb_concordato = inps_dovuti_concordato - contributi_fissi - acconti_inps_versati
+        saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
+        
+        # Calcolo Acconti 2025
+        base_acconto_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute
+        acconto_irpef_no_cpb = (base_acconto_irpef_no_cpb * 0.50) if base_acconto_irpef_no_cpb > 0 else 0
+        
+        base_acconto_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute
+        acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
+
+        acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
+        
+        acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
+        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
+
+        # --- PRESENTAZIONE RISULTATI ---
+        st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
+        st.subheader("Riepilogo Saldi Finali e Acconti da Versare")
+        
+        # Calcolo totali da versare
+        totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_add_regionale_no_cpb + saldo_add_comunale_no_cpb + saldo_inps_no_cpb + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
+        totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_concordato + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_inps_si_cpb + acconto_2_inps_si_cpb
+        totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_effettivo + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb # Per l'opzione INPS su effettivo, anche gli acconti INPS si basano sull'effettivo
+
+        df_saldi = pd.DataFrame({
+             "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"N/A", f"{saldo_add_regionale_no_cpb:,.2f} €", f"{saldo_add_comunale_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_comunale_no_cpb:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_no_cpb:,.2f} €**"],
+             "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_inps_si_cpb:,.2f} €", f"{acconto_2_inps_si_cpb:,.2f} €", f"**{totale_versare_si_cpb_conc:,.2f} €**"],
+             "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
+        }, index=["IRPEF a Debito/Credito", "Imposta Sostitutiva CPB", "Addizionale Regionale", "Saldo Add. Comunale", "Saldo INPS a Debito/Credito", "1° Acconto IRPEF", "2° Acconto IRPEF", "Acconto Add. Comunale", "1° Acconto INPS", "2° Acconto INPS", "TOTALE DA VERSARE"])
+        st.table(df_saldi)
+
+
+
 
 #==============================================================================
 # --- CALCOLATORE PER SOCIETÀ IN TRASPARENZA ---
