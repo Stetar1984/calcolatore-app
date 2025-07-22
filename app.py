@@ -206,9 +206,13 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         
         # Calcolo Acconti 2025
-        acconto_irpef_no_cpb = (irpef_lorda_no_cpb - detrazioni_irpef) * 0.50
+             base_acconto_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute
+        acconto_irpef_no_cpb = (base_acconto_irpef_no_cpb * 0.50) if base_acconto_irpef_no_cpb > 0 else 0
+        
+        base_acconto_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute
+        acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
+
         acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
-        acconto_irpef_si_cpb = (irpef_lorda_si_cpb - detrazioni_irpef) * 0.50
         acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
         
         acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
