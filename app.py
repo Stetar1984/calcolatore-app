@@ -192,8 +192,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
         
         # Calcolo Saldo IRPEF
-        saldo_irpef_no_cpb = (irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati)
-        if irpef_lorda_no_cpb - detrazioni_irpef > 0 else irpef_lorda_no_cpb - imposte_gia_trattenute - acconti_versati 
+        saldo_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
         saldo_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
         
         # Calcolo Saldo Addizionali
