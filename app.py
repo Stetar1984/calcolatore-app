@@ -137,7 +137,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         col_add1, col_add2 = st.columns(2)
         with col_add1:
             st.markdown("**Addizionali IRPEF**")
-            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%):", value=1.23, format="%.2f", key="add_reg_ind")
+            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (inserire imposta/imponibile):", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
             addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
@@ -288,7 +288,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
             col_add_soc1, col_add_soc2 = st.columns(2)
             with col_add_soc1:
-                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
+                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1} (inserire imposta/imponibile)", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
                 socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
                 socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
