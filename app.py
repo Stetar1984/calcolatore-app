@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import math
 
 # ==============================================================================
 # --- FUNZIONI DI CALCOLO ---
@@ -38,10 +39,9 @@ def calcola_inps_saldo(reddito_imponibile, gestione, minimale, fissi, scaglione1
         return fissi + contributo1 + contributo2
     return 0
 
-def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scaglione1_cap, aliquota1, aliquota2, massimale):
+def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scaglione1_cap_acconti, aliquota1, aliquota2, massimale):
     """Calcola i due acconti INPS per l'anno successivo."""
     if gestione == "Gestione Separata":
-        # Per la Gestione Separata, l'acconto è sull'intero imponibile (senza minimale)
         totale_acconto = reddito_base_acconto * (aliquota1 / 100.0)
         return totale_acconto * 0.50, totale_acconto * 0.50
 
@@ -49,7 +49,6 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     if base_imponibile_acconto <= 0:
         return 0, 0
     
-    # Il reddito per gli acconti non può superare il massimale
     base_imponibile_acconto_capped = min(base_imponibile_acconto + minimale_acconti, massimale) - minimale_acconti
 
     aliquota1_dec = aliquota1 / 100.0
@@ -57,14 +56,13 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     
     contributo1 = 0
     if base_imponibile_acconto_capped > 0:
-        # Cap del primo scaglione per la parte variabile
-        cap_primo_scaglione_variabile = scaglione1_cap - minimale_acconti
+        cap_primo_scaglione_variabile = scaglione1_cap_acconti - minimale_acconti
         base1 = min(base_imponibile_acconto_capped, cap_primo_scaglione_variabile)
         contributo1 = base1 * aliquota1_dec
     
     contributo2 = 0
-    if base_imponibile_acconto_capped > (scaglione1_cap - minimale_acconti):
-        base2 = base_imponibile_acconto_capped - (scaglione1_cap - minimale_acconti)
+    if base_imponibile_acconto_capped > (scaglione1_cap_acconti - minimale_acconti):
+        base2 = base_imponibile_acconto_capped - (scaglione1_cap_acconti - minimale_acconti)
         contributo2 = base2 * aliquota2_dec
         
     totale_acconto = contributo1 + contributo2
@@ -150,19 +148,22 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
             imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
 
-
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
-            minimale_inps = st.number_input("Reddito Minimale INPS:", value=18415.0, format="%.2f", key="min_ind")
+            minimale_inps = st.number_input("Reddito Minimale INPS (saldo):", value=18415.0, format="%.2f", key="min_ind")
         with col_inps2:
-            scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS:", value=55008.0, format="%.2f", key="cap1_ind")
+            scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS (saldo):", value=55008.0, format="%.2f", key="cap1_ind")
             aliquota_inps1 = st.number_input("Aliquota 1° Scaglione (%):", value=24.0, format="%.2f", key="aliq1_ind")
         with col_inps3:
             massimale_inps = st.number_input("Reddito Massimale INPS:", value=119650.0, format="%.2f", key="max_ind")
             aliquota_inps2 = st.number_input("Aliquota 2° Scaglione (%):", value=25.0, format="%.2f", key="aliq2_ind")
-        
+            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55008.0, format="%.2f", key="cap1_acc_ind")
+
         submitted = st.form_submit_button("Esegui Simulazione")
+
+
+
 
     if submitted:
         # Calcolo imponibili IRPEF
@@ -235,6 +236,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         st.table(df_saldi)
 
 
+
+
+
+
 #==============================================================================
 # --- CALCOLATORE PER SOCIETÀ IN TRASPARENZA ---
 #==============================================================================
@@ -279,29 +284,36 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
                 socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}")
                 socio_data['detrazioni_irpef'] = st.number_input(f"DETRAZIONI IRPEF TOTALI Socio {i+1}", value=0.0, format="%.2f", key=f"di_soc_{i}")
-                socio_data['aliquota_add_regionale'] = st.number_input(f"Aliquota Add. Regionale (%) Socio {i+1}", value=1.23, format="%.2f", key=f"add_reg_soc_{i}")
-                socio_data['aliquota_add_comunale'] = st.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
-                socio_data['aliquota_acconto_comunale'] = st.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
-                socio_data['addizionale_comunale_trattenuta'] = st.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
-
-            st.markdown(f"**Dati Contributivi (INPS) Socio {i+1}**")
+                
+            st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
+            col_add_soc1, col_add_soc2 = st.columns(2)
+            with col_add_soc1:
+                socio_data['regione_selezionata'] = col_add_soc1.selectbox(f"Regione di Residenza Socio {i+1}:", options=lista_regioni, key=f"reg_soc_{i}")
+                socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
+                socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
+                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
+            with col_add_soc2:
+                socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
+                socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
+                socio_data['imponibile_minimale_acconti_2025'] = col_add_soc2.number_input(f"Imponibile Minimale Acconti INPS 2025 Socio {i+1}", value=18415.0, format="%.2f", key=f"min_acc_soc_{i}")
+            
             col_inps_s1, col_inps_s2, col_inps_s3 = st.columns(3)
             with col_inps_s1:
-                socio_data['gestione_inps'] = col_inps_s1.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
                 socio_data['contributi_fissi'] = col_inps_s1.number_input(f"Contributi Fissi INPS Versati Socio {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
-                socio_data['acconti_inps_versati'] = col_inps_s1.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
-                socio_data['imponibile_minimale_acconti_2025'] = col_inps_s1.number_input(f"Imponibile Minimale Acconti INPS 2025 Socio {i+1}", value=18415.0, format="%.2f", key=f"min_acc_soc_{i}")
+                socio_data['minimale_inps'] = col_inps_s1.number_input(f"Reddito Minimale INPS (saldo) Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
             with col_inps_s2:
                  socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
                  socio_data['aliquota_inps2'] = col_inps_s2.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
+                 socio_data['scaglione1_cap_inps_acconti'] = col_inps_s2.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55008.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             with col_inps_s3:
-                socio_data['minimale_inps'] = col_inps_s3.number_input(f"Reddito Minimale INPS Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
-                socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
+                socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (saldo) Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
                 socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
             
             soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
+
+
 
     if submitted_soc:
         # CALCOLO IRAP
@@ -392,3 +404,5 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.table(df_saldi_socio)
             
             st.markdown("---")
+
+
