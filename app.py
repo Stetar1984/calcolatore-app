@@ -353,7 +353,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             # Calcolo Acconti IRPEF e Comunale
             acconto_irpef_no_cpb = (irpef_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']) * 0.50
             acconto_comunale_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
-            acconto_irpef_si_cpb = (irpef_lorda_si_cpb - socio['detrazioni_irpef'] - socio[imposte_gia_trattenute]) * 0.50
+            acconto_irpef_si_cpb = (irpef_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']) * 0.50
             acconto_comunale_si_cpb = addizionale_comunale_socio_si_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
 
             # Calcolo Acconti INPS
