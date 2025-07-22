@@ -39,9 +39,10 @@ def calcola_inps_saldo(reddito_imponibile, gestione, minimale, fissi, scaglione1
         return fissi + contributo1 + contributo2
     return 0
 
-def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scaglione1_cap_acconti, aliquota1, aliquota2, massimale):
+def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scaglione1_cap, aliquota1, aliquota2, massimale):
     """Calcola i due acconti INPS per l'anno successivo."""
     if gestione == "Gestione Separata":
+        # Per la Gestione Separata, l'acconto è sull'intero imponibile (senza minimale)
         totale_acconto = reddito_base_acconto * (aliquota1 / 100.0)
         return totale_acconto * 0.50, totale_acconto * 0.50
 
@@ -49,6 +50,7 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     if base_imponibile_acconto <= 0:
         return 0, 0
     
+    # Il reddito per gli acconti non può superare il massimale
     base_imponibile_acconto_capped = min(base_imponibile_acconto + minimale_acconti, massimale) - minimale_acconti
 
     aliquota1_dec = aliquota1 / 100.0
@@ -56,22 +58,33 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     
     contributo1 = 0
     if base_imponibile_acconto_capped > 0:
-        cap_primo_scaglione_variabile = scaglione1_cap_acconti - minimale_acconti
+        # Cap del primo scaglione per la parte variabile
+        cap_primo_scaglione_variabile = scaglione1_cap - minimale_acconti
         base1 = min(base_imponibile_acconto_capped, cap_primo_scaglione_variabile)
         contributo1 = base1 * aliquota1_dec
     
     contributo2 = 0
-    if base_imponibile_acconto_capped > (scaglione1_cap_acconti - minimale_acconti):
-        base2 = base_imponibile_acconto_capped - (scaglione1_cap_acconti - minimale_acconti)
+    if base_imponibile_acconto_capped > (scaglione1_cap - minimale_acconti):
+        base2 = base_imponibile_acconto_capped - (scaglione1_cap - minimale_acconti)
         contributo2 = base2 * aliquota2_dec
         
     totale_acconto = contributo1 + contributo2
     return totale_acconto * 0.50, totale_acconto * 0.50
 
+# ==============================================================================
+# --- DATABASE ALIQUOTE E IMPOSTAZIONI PAGINA ---
+# ==============================================================================
 
-# ==============================================================================
-# --- IMPOSTAZIONI PAGINA E TITOLO ---
-# ==============================================================================
+aliquote_regionali_2024 = {
+    "Abruzzo": 1.73, "Basilicata": 1.23, "Calabria": 1.73, "Campania": 1.73,
+    "Emilia-Romagna": 1.33, "Friuli Venezia Giulia": 0.70, "Lazio": 1.73,
+    "Liguria": 1.23, "Lombardia": 1.23, "Marche": 1.23, "Molise": 1.73,
+    "Piemonte": 1.62, "Puglia": 1.33, "Sardegna": 1.23, "Sicilia": 1.23,
+    "Toscana": 1.42, "Umbria": 1.23, "Valle d'Aosta": 1.23, "Veneto": 1.23,
+    "Prov. Aut. Bolzano": 1.23, "Prov. Aut. Trento": 1.23
+}
+lista_regioni = list(aliquote_regionali_2024.keys())
+
 st.set_page_config(layout="wide", page_title="Calcolatore CPB")
 st.title("Calcolatore di Convenienza Concordato Preventivo Biennale")
 st.markdown("Questo strumento confronta il carico fiscale e contributivo totale con e senza l'adesione al CPB.")
@@ -137,17 +150,16 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         col_add1, col_add2 = st.columns(2)
         with col_add1:
             st.markdown("**Addizionali IRPEF**")
-            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%):", value=1.23, format="%.2f", key="add_reg_ind")
+            regione_selezionata = st.selectbox("Regione di Residenza:", options=lista_regioni, key="reg_ind", help="L'aliquota verrà applicata automaticamente. Per le regioni con aliquote progressive, viene usata l'aliquota base.")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
             addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
-
+        
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
             acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
-            imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
-
+        
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
@@ -158,18 +170,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         with col_inps3:
             massimale_inps = st.number_input("Reddito Massimale INPS:", value=119650.0, format="%.2f", key="max_ind")
             aliquota_inps2 = st.number_input("Aliquota 2° Scaglione (%):", value=25.0, format="%.2f", key="aliq2_ind")
-            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55448.0, format="%.2f", key="cap1_acc_ind")
-
+            
         submitted = st.form_submit_button("Esegui Simulazione")
 
-
-
-
-
-
-
-
-
+    
+    
 
     if submitted:
         # Calcolo imponibili IRPEF
@@ -240,6 +245,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
              "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
         }, index=["IRPEF a Debito/Credito", "Imposta Sostitutiva CPB", "Addizionale Regionale", "Saldo Add. Comunale", "Saldo INPS a Debito/Credito", "1° Acconto IRPEF", "2° Acconto IRPEF", "Acconto Add. Comunale", "1° Acconto INPS", "2° Acconto INPS", "TOTALE DA VERSARE"])
         st.table(df_saldi)
+
 
 
 
@@ -319,26 +325,12 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
 
+        
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    if submitted_soc:
+ if submitted_soc:
         # CALCOLO IRAP
         st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
         aliquota_irap = 0.039; irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap; irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap; risparmio_irap = irap_no_cpb - irap_si_cpb
