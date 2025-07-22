@@ -68,6 +68,10 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     totale_acconto = contributo1 + contributo2
     return totale_acconto * 0.50, totale_acconto * 0.50
 
+def arrotonda_standard(valore):
+    """Arrotonda un valore con il metodo standard (0.5 arrotonda per eccesso)."""
+    return math.floor(valore * 100 + 0.5) / 100.0
+
 # ==============================================================================
 # --- DATABASE ALIQUOTE E IMPOSTAZIONI PAGINA ---
 # ==============================================================================
@@ -156,8 +160,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
             acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
-            imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
-
+        
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
@@ -168,10 +171,9 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         with col_inps3:
             massimale_inps = st.number_input("Reddito Massimale INPS:", value=119650.0, format="%.2f", key="max_ind")
             aliquota_inps2 = st.number_input("Aliquota 2° Scaglione (%):", value=25.0, format="%.2f", key="aliq2_ind")
-            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55008.0, format="%.2f", key="cap1_acc_ind")
-        
+            
         submitted = st.form_submit_button("Esegui Simulazione")
-    
+
 
 
 
@@ -312,10 +314,10 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_inps_s2:
                  socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
                  socio_data['aliquota_inps2'] = col_inps_s2.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
+                 socio_data['scaglione1_cap_inps_acconti'] = col_inps_s2.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55008.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             with col_inps_s3:
                 socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (saldo) Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
                 socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
-                socio_data['scaglione1_cap_inps_acconti'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55008.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             
             soci_inputs.append(socio_data)
         
