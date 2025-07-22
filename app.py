@@ -351,10 +351,20 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
 
             # Calcolo Acconti IRPEF e Comunale
-            acconto_irpef_no_cpb = if (irpef_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']) >0 : (irpef_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']) * 0.50
-            else = 0
+             # Calcolo Saldi e Acconti
+            saldo_irpef_no_cpb = irpef_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
+            saldo_inps_no_cpb = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            
+            saldo_irpef_si_cpb = irpef_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute'] - socio['acconti_versati']
+            saldo_inps_si_cpb_concordato = inps_dovuti_concordato - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            
+            base_acconto_irpef_no_cpb_soc = irpef_lorda_no_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
+            acconto_irpef_no_cpb = (base_acconto_irpef_no_cpb_soc * 0.50) if base_acconto_irpef_no_cpb_soc > 0 else 0
             acconto_comunale_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
-            acconto_irpef_si_cpb = (irpef_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']) * 0.50
+            
+            base_acconto_irpef_si_cpb_soc = irpef_lorda_si_cpb - socio['detrazioni_irpef'] - socio['imposte_gia_trattenute']
+            acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb_soc * 0.50) if base_acconto_irpef_si_cpb_soc > 0 else 0
             acconto_comunale_si_cpb = addizionale_comunale_socio_si_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
 
             # Calcolo Acconti INPS
