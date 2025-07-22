@@ -193,6 +193,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         # Calcolo Saldo IRPEF
         saldo_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
+        if (irpef_lorda_no_cpb - detrazioni_irpef) > 0 else (irpef_lorda_no_cpb - imposte_gia_trattenute - acconti_versati) 
         saldo_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
         
         # Calcolo Saldo Addizionali
