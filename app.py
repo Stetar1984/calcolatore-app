@@ -137,15 +137,15 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         col_add1, col_add2 = st.columns(2)
         with col_add1:
             st.markdown("**Addizionali IRPEF**")
-            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (inserire imposta/imponibile):", value=1.23, format="%.2f", key="add_reg_ind")
+            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (inserire imposta/imponibile da quadro RV):", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
-            addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
+            addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta (da quadro RV11):", value=0.0, format="%.2f", key="add_com_trat_ind")
 
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
-            acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
+            acconti_inps_versati = st.number_input("Acconti INPS Versati (parte ecc. minimale):", value=0.0, format="%.2f", key="acc_inps_ind")
             imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
 
         col_inps1, col_inps2, col_inps3 = st.columns(3)
@@ -153,12 +153,12 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
             minimale_inps = st.number_input("Reddito Minimale INPS (saldo):", value=18415.0, format="%.2f", key="min_ind")
         with col_inps2:
-            scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS (saldo):", value=55008.0, format="%.2f", key="cap1_ind")
+            scaglione1_cap_inps = st.number_input("imponibile 1° Scaglione INPS (saldo):", value=55008.0, format="%.2f", key="cap1_ind")
             aliquota_inps1 = st.number_input("Aliquota 1° Scaglione (%):", value=24.0, format="%.2f", key="aliq1_ind")
         with col_inps3:
             massimale_inps = st.number_input("Reddito Massimale INPS:", value=119650.0, format="%.2f", key="max_ind")
             aliquota_inps2 = st.number_input("Aliquota 2° Scaglione (%):", value=25.0, format="%.2f", key="aliq2_ind")
-            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55448.0, format="%.2f", key="cap1_acc_ind")
+            scaglione1_cap_inps_acconti = st.number_input("imponibile 1° Scaglione INPS (acconti):", value=55448.0, format="%.2f", key="cap1_acc_ind")
 
         submitted = st.form_submit_button("Esegui Simulazione")
 
@@ -288,10 +288,10 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
             col_add_soc1, col_add_soc2 = st.columns(2)
             with col_add_soc1:
-                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1} (inserire imposta/imponibile)", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
+                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1} (inserire imposta/imponibile da quadro RV)", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
                 socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
-                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
+                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1} (da quadro RV11):", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
             with col_add_soc2:
                 socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
                 socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
