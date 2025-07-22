@@ -329,8 +329,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
 
 
 
-
-
  if submitted_soc:
         # CALCOLO IRAP
         st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
