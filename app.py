@@ -312,6 +312,22 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
+            
+            col_inps_s1, col_inps_s2, col_inps_s3 = st.columns(3)
+            with col_inps_s1:
+                socio_data['contributi_fissi'] = col_inps_s1.number_input(f"Contributi Fissi INPS Versati Socio {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
+                socio_data['minimale_inps'] = col_inps_s1.number_input(f"Reddito Minimale INPS (saldo) Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
+            with col_inps_s2:
+                 socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
+                 socio_data['aliquota_inps2'] = col_inps_s2.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
+                 socio_data['scaglione1_cap_inps_acconti'] = col_inps_s2.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55448.0, format="%.2f", key=f"cap1_acc_soc_{i}")
+            with col_inps_s3:
+                socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (saldo) Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
+                socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
+            
+            soci_inputs.append(socio_data)
+        
+        submitted_soc = st.form_submit_button("Esegui Simulazione Società")
 
 
 
