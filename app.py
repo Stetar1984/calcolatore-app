@@ -68,6 +68,10 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     totale_acconto = contributo1 + contributo2
     return totale_acconto * 0.50, totale_acconto * 0.50
 
+def arrotonda_standard(valore):
+    """Arrotonda un valore con il metodo standard (0.5 arrotonda per eccesso)."""
+    return math.floor(valore * 100 + 0.5) / 100.0
+
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
 # ==============================================================================
@@ -139,14 +143,14 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%):", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
+            addizionale_regionale_trattenuta = st.number_input("Addizionale Regionale già Trattenuta:", value=0.0, format="%.2f", key="add_reg_trat_ind")
             addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
 
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
             acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
-            imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
-
+            
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
             contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
@@ -157,11 +161,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         with col_inps3:
             massimale_inps = st.number_input("Reddito Massimale INPS:", value=119650.0, format="%.2f", key="max_ind")
             aliquota_inps2 = st.number_input("Aliquota 2° Scaglione (%):", value=25.0, format="%.2f", key="aliq2_ind")
-            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55448.0, format="%.2f", key="cap1_acc_ind")
-
+            scaglione1_cap_inps_acconti = st.number_input("Cap 1° Scaglione INPS (acconti):", value=55008.0, format="%.2f", key="cap1_acc_ind")
+        
         submitted = st.form_submit_button("Esegui Simulazione")
 
-    if submitted:
+if submitted:
         # Calcolo imponibili IRPEF
         base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili
         base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
@@ -286,11 +290,11 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
                 socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
+                socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Regionale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
                 socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
             with col_add_soc2:
                 socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
                 socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
-                socio_data['imponibile_minimale_acconti_2025'] = col_add_soc2.number_input(f"Imponibile Minimale Acconti INPS 2025 Socio {i+1}", value=18415.0, format="%.2f", key=f"min_acc_soc_{i}")
             
             col_inps_s1, col_inps_s2, col_inps_s3 = st.columns(3)
             with col_inps_s1:
@@ -302,7 +306,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_inps_s3:
                 socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (saldo) Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
                 socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
-                socio_data['scaglione1_cap_inps_acconti'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55448.0, format="%.2f", key=f"cap1_acc_soc_{i}")
+                socio_data['scaglione1_cap_inps_acconti'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55008.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             
             soci_inputs.append(socio_data)
         
@@ -310,7 +314,8 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
 
 
 
- if submitted_soc:
+
+if submitted_soc:
         # CALCOLO IRAP
         st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
         aliquota_irap = 0.039; irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap; irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap; risparmio_irap = irap_no_cpb - irap_si_cpb
@@ -399,4 +404,3 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.table(df_saldi_socio)
             
             st.markdown("---")
-
