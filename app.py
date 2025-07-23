@@ -221,7 +221,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         st.subheader("Riepilogo Saldi Finali e Acconti da Versare")
         
         # Calcolo totali da versare
-        totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_add_regionale_no_cpb + saldo_add_comunale_no_cpb + saldo_inps_no_cpb + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
+        totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_add_regionale_no_cpb + (saldo_add_comunale_no_cpb - 'addizionale_comunale_trattenuta') + saldo_inps_no_cpb + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
         totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_concordato + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_inps_si_cpb + acconto_2_inps_si_cpb
         totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_effettivo + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb # Per l'opzione INPS su effettivo, anche gli acconti INPS si basano sull'effettivo
 
