@@ -169,8 +169,8 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
     if submitted:
         # Calcolo imponibili IRPEF
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili
-        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi        
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
         
         # Calcolo IRPEF lorda
         irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
@@ -197,7 +197,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         # Calcolo Contributi INPS
         inps_dovuti_effettivo = calcola_inps_saldo(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        inps_dovuti_concordato = calcola_inps_saldo(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
         
         # Calcolo Saldo INPS
         saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
@@ -229,7 +229,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         acconto_2_cedolare = (totale_acconto_cedolare * 0.50) if totale_acconto_cedolare > 0 else 0
 
         acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
-        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_proposto_cpb_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
+        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
 
         # --- PRESENTAZIONE RISULTATI ---
         st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
@@ -355,8 +355,8 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
 
             # Calcoli imponibili IRPEF
-            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili']
-            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili']
+            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
+            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             
             # Calcolo IRPEF lorda
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
