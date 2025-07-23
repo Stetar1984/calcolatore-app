@@ -139,8 +139,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%):", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
-            addizionale_regionale_trattenuta = st.number_input("Addizionale Regionale già Trattenuta:", value=0.0, format="%.2f", key="add_reg_trat_ind")
-            addizionale_comunale_trattenuta = st.number_input("Addizionale Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
+            addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta:", value=0.0, format="%.2f", key="add_reg_trat_ind")
+            addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
+            acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto:", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
+
 
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
@@ -213,8 +215,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-        acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
-        acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
+
+        acconto_comunale_lordo_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
         
         acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
         acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_proposto_cpb_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
@@ -286,8 +291,9 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
                 socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
-                socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Regionale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
-                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Addizionale Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
+                socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Regionale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
+                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
+                socio_data['acconto_addizionale_comunale_trattenuto'] = col_add_soc1.number_input(f"Acconto Add. Comunale già Trattenuto Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_acc_trat_soc_{i}")
             with col_add_soc2:
                 socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
                 socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
@@ -375,9 +381,12 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             
             base_acconto_irpef_si_cpb_soc = irpef_netta_si_cpb - socio['imposte_gia_trattenute']
             acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb_soc * 0.50) if base_acconto_irpef_si_cpb_soc > 0 else 0
-            
-            acconto_comunale_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
-            acconto_comunale_si_cpb = addizionale_comunale_socio_si_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
+
+            acconto_comunale_lordo_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
+            acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - socio['acconto_addizionale_comunale_trattenuto']
+
+            acconto_comunale_lordo_si_cpb = addizionale_comunale_socio_si_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
+            acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - socio['acconto_addizionale_comunale_trattenuto']
 
             # Calcolo Acconti INPS
             acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(quota_reddito_simulato, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
