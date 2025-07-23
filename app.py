@@ -195,7 +195,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         # Calcolo Contributi INPS
         inps_dovuti_effettivo = calcola_inps_saldo(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb_2024 + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
         
         # Calcolo Saldo INPS
         saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
