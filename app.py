@@ -167,8 +167,8 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
     if submitted:
         # Calcolo imponibili IRPEF
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili
-        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
         
         # Calcolo IRPEF lorda
         irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
@@ -348,8 +348,8 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             quota_reddito_rettificato_cpb = reddito_impresa_rettificato_cpb_soc * perc_socio
 
             # Calcoli imponibili IRPEF
-            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili']
-            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili']
+            base_imponibile_no_cpb_irpef = quota_reddito_simulato + socio['altri_redditi'] - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
+            base_imponibile_si_cpb_irpef = socio['altri_redditi'] + quota_reddito_rettificato_cpb - socio['oneri_deducibili'] - socio['cedolare_secca_redditi']
             
             # Calcolo IRPEF lorda
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
