@@ -68,7 +68,6 @@ def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scagl
     totale_acconto = contributo1 + contributo2
     return totale_acconto * 0.50, totale_acconto * 0.50
 
-
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
 # ==============================================================================
@@ -162,13 +161,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         submitted = st.form_submit_button("Esegui Simulazione")
 
-
-
-
     if submitted:
         # Calcolo imponibili IRPEF
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
-        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili
+        base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili
         
         # Calcolo IRPEF lorda
         irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
@@ -189,37 +185,37 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         # Calcolo Contributi INPS
         inps_dovuti_effettivo = calcola_inps_saldo(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        
-        # Calcolo Saldo IRPEF
-        saldo_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
-        saldo_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute - acconti_versati
-        
-        # Calcolo Saldo Addizionali
-        saldo_add_regionale_no_cpb = addizionale_regionale_no_cpb
-        saldo_add_comunale_no_cpb = addizionale_comunale_no_cpb - addizionale_comunale_trattenuta
-        saldo_add_regionale_si_cpb = addizionale_regionale_si_cpb
-        saldo_add_comunale_si_cpb = addizionale_comunale_si_cpb - addizionale_comunale_trattenuta
+        inps_dovuti_concordato = calcola_inps_saldo(reddito_proposto_cpb_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
         
         # Calcolo Saldo INPS
         saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         saldo_inps_si_cpb_concordato = inps_dovuti_concordato - contributi_fissi - acconti_inps_versati
         saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         
+        # --- MODIFICA RICHIESTA: CALCOLO IRPEF NETTA E SALDO ---
+        irpef_netta_no_cpb = max(0, irpef_lorda_no_cpb - detrazioni_irpef)
+        saldo_irpef_no_cpb = irpef_netta_no_cpb - imposte_gia_trattenute - acconti_versati
+        
+        irpef_netta_si_cpb = max(0, irpef_lorda_si_cpb - detrazioni_irpef)
+        saldo_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute - acconti_versati
+        
         # Calcolo Acconti 2025
-        base_acconto_irpef_no_cpb = irpef_lorda_no_cpb - detrazioni_irpef - imposte_gia_trattenute
+        base_acconto_irpef_no_cpb = irpef_netta_no_cpb - imposte_gia_trattenute
         acconto_irpef_no_cpb = (base_acconto_irpef_no_cpb * 0.50) if base_acconto_irpef_no_cpb > 0 else 0
         
-        base_acconto_irpef_si_cpb = irpef_lorda_si_cpb - detrazioni_irpef - imposte_gia_trattenute
+        base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
         acconto_comunale_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
         
         acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
-        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
+        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_proposto_cpb_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
 
-        # --- PRESENTAZIONE RISULTATI ---
+
+
+
+# --- PRESENTAZIONE RISULTATI ---
         st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
         st.subheader("Riepilogo Saldi Finali e Acconti da Versare")
         
@@ -234,7 +230,6 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
              "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
         }, index=["IRPEF a Debito/Credito", "Imposta Sostitutiva CPB", "Addizionale Regionale", "Saldo Add. Comunale", "Saldo INPS a Debito/Credito", "1° Acconto IRPEF", "2° Acconto IRPEF", "Acconto Add. Comunale", "1° Acconto INPS", "2° Acconto INPS", "TOTALE DA VERSARE"])
         st.table(df_saldi)
-
 
 
 
@@ -284,7 +279,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
                 socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}")
                 socio_data['detrazioni_irpef'] = st.number_input(f"DETRAZIONI IRPEF TOTALI Socio {i+1}", value=0.0, format="%.2f", key=f"di_soc_{i}")
-                
+            
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
             col_add_soc1, col_add_soc2 = st.columns(2)
             with col_add_soc1:
@@ -304,20 +299,18 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_inps_s2:
                  socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
                  socio_data['aliquota_inps2'] = col_inps_s2.number_input(f"Aliquota 2° Scaglione (%) Socio {i+1}:", value=25.0, format="%.2f", key=f"aliq2_soc_{i}")
-                 socio_data['scaglione1_cap_inps_acconti'] = col_inps_s2.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55448.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             with col_inps_s3:
                 socio_data['scaglione1_cap_inps'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (saldo) Socio {i+1}:", value=55008.0, format="%.2f", key=f"cap1_soc_{i}")
                 socio_data['massimale_inps'] = col_inps_s3.number_input(f"Reddito Massimale INPS Socio {i+1}:", value=119650.0, format="%.2f", key=f"max_soc_{i}")
+                socio_data['scaglione1_cap_inps_acconti'] = col_inps_s3.number_input(f"Cap 1° Scaglione INPS (acconti) Socio {i+1}", value=55448.0, format="%.2f", key=f"cap1_acc_soc_{i}")
             
             soci_inputs.append(socio_data)
         
         submitted_soc = st.form_submit_button("Esegui Simulazione Società")
-            
 
 
 
-
-    if submitted_soc:
+ if submitted_soc:
         # CALCOLO IRAP
         st.markdown("---"); st.subheader(f"Parte 1: Analisi IRAP per la Società: {nome_societa}")
         aliquota_irap = 0.039; irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap; irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap; risparmio_irap = irap_no_cpb - irap_si_cpb
@@ -406,3 +399,4 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.table(df_saldi_socio)
             
             st.markdown("---")
+
