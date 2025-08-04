@@ -286,14 +286,14 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             col_socio1, col_socio2 = st.columns(2)
             with col_socio1:
                 socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF Socio {i+1}", value=0.0, format="%.2f", key=f"ar_soc_{i}")
-                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (escluso INPS quota socio) Socio {i+1}", value=0.0, format="%.2f", key=f"od_soc_{i}")
-                socio_data['imposte_gia_trattenute'] = st.number_input(f"RITENUTE TOTALI SUBITE Socio {i+1}", value=0.0, format="%.2f", key=f"igt_soc_{i}")
-                socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}")
-                socio_data['detrazioni_irpef'] = st.number_input(f"DETRAZIONI IRPEF TOTALI Socio {i+1}", value=0.0, format="%.2f", key=f"di_soc_{i}")
+                socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (RN3) Socio {i+1}", value=0.0, format="%.2f", key=f"od_soc_{i}")
+                socio_data['imposte_gia_trattenute'] = st.number_input(f"RITENUTE TOTALI SUBITE (RN33 colonna 4) Socio {i+1}", value=0.0, format="%.2f", key=f"igt_soc_{i}")
+                socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI (RN38 colonna 6) Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}")
+                socio_data['detrazioni_irpef'] = st.number_input(f"DETRAZIONI IRPEF TOTALI (RN22) Socio {i+1}", value=0.0, format="%.2f", key=f"di_soc_{i}")
             with col_socio2:
-                socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}")
-                socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
-                socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca Socio {i+1} (%):", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
+                socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA (LC1 colonna 2) Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}")
+                socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
+                socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca (%) Socio {i+1} (%):", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
             
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
             col_add_soc1, col_add_soc2 = st.columns(2)
