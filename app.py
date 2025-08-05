@@ -124,7 +124,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             diritto_camerale = st.number_input("Diritto Camerale Annuale:", value=53.0, format="%.2f", key="dir_cam_ind")
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN senza H + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
             oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
             imposte_gia_trattenute = st.number_input("RITENUTE TOTALI SUBITE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             acconti_versati = st.number_input("ACCONTI IRPEF VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
@@ -285,7 +285,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.markdown(f"**Dati Fiscali Personali (IRPEF) Socio {i+1}**")
             col_socio1, col_socio2 = st.columns(2)
             with col_socio1:
-                socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN + LC2 colonna 1) Socio {i+1}", value=0.0, format="%.2f", key=f"ar_soc_{i}")
+                socio_data['altri_redditi'] = st.number_input(f"ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN senza H + LC2 colonna 1) Socio {i+1}", value=0.0, format="%.2f", key=f"ar_soc_{i}")
                 socio_data['oneri_deducibili'] = st.number_input(f"ONERI DEDUCIBILI (RN3) Socio {i+1}", value=0.0, format="%.2f", key=f"od_soc_{i}")
                 socio_data['imposte_gia_trattenute'] = st.number_input(f"RITENUTE TOTALI SUBITE (RN33 colonna 4) Socio {i+1}", value=0.0, format="%.2f", key=f"igt_soc_{i}")
                 socio_data['acconti_versati'] = st.number_input(f"ACCONTI IRPEF VERSATI (RN38 colonna 6) Socio {i+1}", value=0.0, format="%.2f", key=f"av_soc_{i}")
