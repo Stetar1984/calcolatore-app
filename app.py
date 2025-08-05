@@ -147,7 +147,6 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta (RV11 colonna 6):", value=0.0, format="%.2f", key="add_com_trat_ind")
             acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto (RV17 colonna 6):", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
 
-
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
@@ -283,7 +282,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             valore_produzione_irap_rettificato_cpb_soc = st.number_input("Valore della produzione IRAP rettificato per CPB SOCIETA' (IP74):", value=318210.49, format="%.2f")
             punteggio_isa_n_soc = st.slider("Punteggio ISA Società (anno n):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
             diritto_camerale_soc = st.number_input("Diritto Camerale Annuale Società:", value=120.0, format="%.2f", key="dir_cam_soc")
-
+            acconti_irap_versati = st.number_input("Acconti IRAP Versati:", value=0.0, format="%.2f", key="acc_irap_soc")
 
         st.markdown("---")
         st.subheader("Dati dei Singoli Soci")
@@ -348,14 +347,26 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
         aliquota_irap = 0.039
         irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap
         irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap
+        
+        saldo_irap_no_cpb = irap_no_cpb - acconti_irap_versati
+        saldo_irap_si_cpb = irap_si_cpb - acconti_irap_versati
+
+        acconto_1_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
+        acconto_2_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
+        acconto_1_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
+        acconto_2_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
+
+        totale_soc_no_cpb = saldo_irap_no_cpb + diritto_camerale_soc + acconto_1_irap_no_cpb + acconto_2_irap_no_cpb
+        totale_soc_si_cpb = saldo_irap_si_cpb + diritto_camerale_soc + acconto_1_irap_si_cpb + acconto_2_irap_si_cpb
+
         risparmio_irap = irap_no_cpb - irap_si_cpb
         
         df_costi_societa = pd.DataFrame({
-            "Senza Concordato": [f"{irap_no_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €"], 
-            "Con Concordato": [f"{irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €"], 
-            "Risparmio/Onere": [f"{risparmio_irap:,.2f} €", "N/A"]
+            "Senza Concordato": [f"{saldo_irap_no_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_no_cpb:,.2f} €", f"{acconto_2_irap_no_cpb:,.2f} €", f"**{totale_soc_no_cpb:,.2f} €**"], 
+            "Con Concordato": [f"{saldo_irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_si_cpb:,.2f} €", f"{acconto_2_irap_si_cpb:,.2f} €", f"**{totale_soc_si_cpb:,.2f} €**"], 
+            "Risparmio/Onere IRAP": [f"{risparmio_irap:,.2f} €", "N/A", "N/A", "N/A", "N/A"]
             }, 
-            index=["Imposta IRAP Dovuta", "Diritto Camerale Annuale"])
+            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE COSTI SOCIETÀ"])
         st.table(df_costi_societa)
         
         st.markdown("---"); st.subheader("Parte 2: Analisi IRPEF e INPS per i Singoli Soci")
