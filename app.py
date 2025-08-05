@@ -150,12 +150,12 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
-            acconti_inps_versati = st.number_input("Acconti INPS Versati (parte variabile):", value=0.0, format="%.2f", key="acc_inps_ind")
+            acconti_inps_versati = st.number_input("Acconti INPS Versati su reddito ecc. il minimale (da RR2 colonna 27):", value=0.0, format="%.2f", key="acc_inps_ind")
             imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
 
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
-            contributi_fissi = st.number_input("Contributi Fissi INPS Versati:", value=4515.43, format="%.2f", key="fissi_ind")
+            contributi_fissi = st.number_input("Contributi su minimale INPS Versati (da RR2 colonna 14):", value=4515.43, format="%.2f", key="fissi_ind")
             minimale_inps = st.number_input("Reddito Minimale INPS (saldo):", value=18415.0, format="%.2f", key="min_ind")
         with col_inps2:
             scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS (saldo):", value=55008.0, format="%.2f", key="cap1_ind")
@@ -306,12 +306,12 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
                 socio_data['acconto_addizionale_comunale_trattenuto'] = col_add_soc1.number_input(f"Acconto Add. Comunale già Trattenuto Socio (RV17 colonna 6) {i+1}:", value=0.0, format="%.2f", key=f"add_com_acc_trat_soc_{i}")
             with col_add_soc2:
                 socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
-                socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
+                socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati su reddito ecc. il minimale (da RR2 colonna 27) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
                 socio_data['imponibile_minimale_acconti_2025'] = col_add_soc2.number_input(f"Imponibile Minimale Acconti INPS 2025 Socio {i+1}", value=18415.0, format="%.2f", key=f"min_acc_soc_{i}")
             
             col_inps_s1, col_inps_s2, col_inps_s3 = st.columns(3)
             with col_inps_s1:
-                socio_data['contributi_fissi'] = col_inps_s1.number_input(f"Contributi Fissi INPS Versati Socio {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
+                socio_data['contributi_fissi'] = col_inps_s1.number_input(f"Contributi su minimale INPS Versati Socio (da RR2 colonna 14) {i+1}:", value=4515.43, format="%.2f", key=f"fissi_soc_{i}")
                 socio_data['minimale_inps'] = col_inps_s1.number_input(f"Reddito Minimale INPS (saldo) Socio {i+1}:", value=18415.0, format="%.2f", key=f"min_soc_{i}")
             with col_inps_s2:
                  socio_data['aliquota_inps1'] = col_inps_s2.number_input(f"Aliquota 1° Scaglione (%) Socio {i+1}:", value=24.0, format="%.2f", key=f"aliq1_soc_{i}")
