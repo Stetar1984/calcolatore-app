@@ -139,12 +139,12 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         col_add1, col_add2 = st.columns(2)
         with col_add1:
             st.markdown("**Addizionali IRPEF**")
-            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%):", value=1.23, format="%.2f", key="add_reg_ind")
+            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (RV2 colonna 2/RV1)*100:", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%):", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
-            addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta:", value=0.0, format="%.2f", key="add_reg_trat_ind")
-            addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta:", value=0.0, format="%.2f", key="add_com_trat_ind")
-            acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto:", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
+            addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta (RV3 colonna 3):", value=0.0, format="%.2f", key="add_reg_trat_ind")
+            addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta (RV11 colonna 6):", value=0.0, format="%.2f", key="add_com_trat_ind")
+            acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto (RV17 colonna 6):", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
 
 
         with col_add2:
@@ -293,17 +293,17 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_socio2:
                 socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA (LC1 colonna 2) Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}")
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
-                socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca (%) Socio {i+1} (%):", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
+                socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca (%) Socio {i+1} :", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
             
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
             col_add_soc1, col_add_soc2 = st.columns(2)
             with col_add_soc1:
-                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
+                socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) (RV2 colonna 2/RV1)*100 Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
                 socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
-                socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Regionale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
-                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Comunale già Trattenuta Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
-                socio_data['acconto_addizionale_comunale_trattenuto'] = col_add_soc1.number_input(f"Acconto Add. Comunale già Trattenuto Socio {i+1}:", value=0.0, format="%.2f", key=f"add_com_acc_trat_soc_{i}")
+                socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Regionale già Trattenuta Socio (RV3 colonna 3) {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
+                socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Comunale già Trattenuta Socio (RV11 colonna 6) {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
+                socio_data['acconto_addizionale_comunale_trattenuto'] = col_add_soc1.number_input(f"Acconto Add. Comunale già Trattenuto Socio (RV17 colonna 6) {i+1}:", value=0.0, format="%.2f", key=f"add_com_acc_trat_soc_{i}")
             with col_add_soc2:
                 socio_data['gestione_inps'] = col_add_soc2.selectbox(f"Gestione INPS Socio {i+1}:", ("Artigiani", "Commercianti", "Gestione Separata"), key=f"gest_soc_{i}")
                 socio_data['acconti_inps_versati'] = col_add_soc2.number_input(f"Acconti INPS Versati (var.) Socio {i+1}", value=0.0, format="%.2f", key=f"acc_inps_soc_{i}")
