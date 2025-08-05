@@ -343,7 +343,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
 
     if submitted_soc:
         # CALCOLO IRAP E DIRITTO CAMERALE
-        st.markdown("---"); st.subheader(f"Parte 1: Analisi Costi Fissi per la Società: {nome_societa}")
+        st.markdown("---"); st.subheader(f"Parte 1: Analisi per la Società: {nome_societa}")
         aliquota_irap = 0.039
         irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap
         irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap
@@ -366,7 +366,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             "Con Concordato": [f"{saldo_irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_si_cpb:,.2f} €", f"{acconto_2_irap_si_cpb:,.2f} €", f"**{totale_soc_si_cpb:,.2f} €**"], 
             "Risparmio/Onere IRAP": [f"{risparmio_irap:,.2f} €", "N/A", "N/A", "N/A", "N/A"]
             }, 
-            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE COSTI SOCIETÀ"])
+            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE VERSAMENTI SOCIETÀ"])
         st.table(df_costi_societa)
         
         st.markdown("---"); st.subheader("Parte 2: Analisi IRPEF e INPS per i Singoli Soci")
