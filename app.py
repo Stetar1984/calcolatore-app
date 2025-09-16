@@ -177,7 +177,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
         
         # Calcolo Imposta Sostitutiva e Saldo Cedolare Secca
-        base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
+        base_imponibile_sostitutiva = reddito_proposto_cpb_2025 - reddito_rilevante_cpb_2024
         if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
         
         if punteggio_isa_n_ind >= 8: aliquota_sostitutiva_perc = 0.10
