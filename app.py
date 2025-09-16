@@ -79,9 +79,9 @@ st.markdown("Questo strumento confronta il carico fiscale e contributivo totale 
 # --- DIZIONARIO DELLE DESCRIZIONI AGGIUNTIVE ---
 # ==============================================================================
 descrizioni_aggiuntive = {
-    'reddito_simulato_2024': "CP10 colonna 2",
-    'reddito_rilevante_cpb_2023': "CP1 colonna 2",
-    'reddito_proposto_cpb_2024': "CP1 colonna 1",
+    'reddito_simulato_2025': "CP10 colonna 2",
+    'reddito_rilevante_cpb_2024': "CP1 colonna 2",
+    'reddito_proposto_cpb_2025': "CP1 colonna 1",
     'reddito_impresa_rettificato_cpb': "CP7 colonna 5",
     'altri_redditi': "da riepilogo redditi RN + LC2 colonna 1",
     'oneri_deducibili': "RN3 - Inserire qui gli oneri deducibili DIVERSI dai contributi INPS, che verranno calcolati a parte.",
@@ -90,7 +90,7 @@ descrizioni_aggiuntive = {
     'imposta_su_cedolare_secca': "LC1 colonna 12/13",
     'acconti versati': "RN38 colonna 6",
     'detrazioni IRPEF': "RN22",
-    'valore_produzione_simulato_2024': "IP73 colonna 4",
+    'valore_produzione_simulato_2025': "IP73 colonna 4",
     'valore_produzione_irap_rettificato_cpb': "IP74"
 }
 
@@ -116,10 +116,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col1:
             nome_soggetto = st.text_input(f"NOME {tipo_calcolo.upper()}:", value=f'Mio Studio {tipo_calcolo}')
-            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=70000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=65000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
+            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
             punteggio_isa_n_ind = st.slider("Punteggio ISA:", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
             diritto_camerale = st.number_input("Diritto Camerale Annuale:", value=53.0, format="%.2f", key="dir_cam_ind")
 
