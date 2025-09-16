@@ -132,7 +132,6 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             st.markdown("---")
             cedolare_secca_redditi = st.number_input("REDDITI A CEDOLARE SECCA (LC1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('cedolare_secca_redditi'))
             imposta_su_cedolare_secca = st.number_input("IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposta_su_cedolare_secca'))
-            acconti_cedolare_secca_versati = st.number_input("Acconti Cedolare Secca Versati:", value=0.0, format="%.2f", key="acc_ced_vers_ind")
             aliquota_acconto_cedolare = st.selectbox("Aliquota Acconto Cedolare Secca (%):", [10.0, 21.0], key="aliq_acc_ced_ind")
 
         st.markdown("---")
@@ -146,6 +145,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta (RV3 colonna 3):", value=0.0, format="%.2f", key="add_reg_trat_ind")
             addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta (RV11 colonna 6):", value=0.0, format="%.2f", key="add_com_trat_ind")
             acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto (RV17 colonna 6):", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
+
 
         with col_add2:
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
@@ -169,13 +169,12 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
     if submitted:
         # Calcolo imponibili IRPEF
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi        
         base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
         
         # Calcolo IRPEF lorda
         irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
         
-        # Calcolo Imposta Sostitutiva e Saldo Cedolare Secca
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
         if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
         if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
@@ -183,7 +182,6 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         else: aliquota_sostitutiva = 0.15
         imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
         irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-        saldo_cedolare_secca = imposta_su_cedolare_secca - acconti_cedolare_secca_versati
 
         # Calcolo Addizionali Lorde
         addizionale_regionale_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_add_regionale / 100.0)
@@ -198,16 +196,13 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         saldo_add_comunale_si_cpb = addizionale_comunale_si_cpb - addizionale_comunale_trattenuta
         
         # Calcolo Contributi INPS
-        imponibile_inps_effettivo = reddito_simulato_2024
-        imponibile_inps_concordato = reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva
-
-        inps_dovuti_effettivo = calcola_inps_saldo(imponibile_inps_effettivo, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
-        inps_dovuti_concordato = calcola_inps_saldo(imponibile_inps_concordato, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_effettivo = calcola_inps_saldo(reddito_simulato_2024, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
+        inps_dovuti_concordato = calcola_inps_saldo(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
         
         # Calcolo Saldo INPS
         saldo_inps_no_cpb = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         saldo_inps_si_cpb_concordato = inps_dovuti_concordato - contributi_fissi - acconti_inps_versati
-        saldo_inps_si_cpb_effettivo_base = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
+        saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - contributi_fissi - acconti_inps_versati
         
         # Calcolo IRPEF Netta e Saldo IRPEF
         irpef_netta_no_cpb = max(0, irpef_lorda_no_cpb - detrazioni_irpef)
@@ -223,42 +218,32 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-        acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
-        acconto_comunale_no_cpb = base_imponibile_no_cpb_irpef - acconto_addizionale_comunale_trattenuto
+        acconto_comunale_lordo_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
-        acconto_comunale_lordo_si_cpb = acconto_comunale_lordo_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
 
         totale_acconto_cedolare = cedolare_secca_redditi * (aliquota_acconto_cedolare / 100.0)
         acconto_1_cedolare = (totale_acconto_cedolare * 0.50) if totale_acconto_cedolare > 0 else 0
         acconto_2_cedolare = (totale_acconto_cedolare * 0.50) if totale_acconto_cedolare > 0 else 0
 
-        acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(imponibile_inps_effettivo, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
-        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(imponibile_inps_concordato, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
-
-        # Logica per colonna "INPS su Effettivo"
-        if imponibile_inps_effettivo < imponibile_inps_concordato:
-            saldo_inps_si_cpb_effettivo_finale = saldo_inps_si_cpb_concordato
-            acconto_1_inps_effettivo_finale = acconto_1_inps_si_cpb
-            acconto_2_inps_effettivo_finale = acconto_2_inps_si_cpb
-        else:
-            saldo_inps_si_cpb_effettivo_finale = saldo_inps_si_cpb_effettivo_base
-            acconto_1_inps_effettivo_finale = acconto_1_inps_no_cpb
-            acconto_2_inps_effettivo_finale = acconto_2_inps_no_cpb
+        acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(reddito_simulato_2024, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
+        acconto_1_inps_si_cpb, acconto_2_inps_si_cpb = calcola_acconti_inps(reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva, gestione_inps, imponibile_minimale_acconti_2025, scaglione1_cap_inps_acconti, aliquota_inps1, aliquota_inps2, massimale_inps)
 
         # --- PRESENTAZIONE RISULTATI ---
         st.markdown(f"<h4>Risultati Dettagliati per: {nome_soggetto}</h4>", unsafe_allow_html=True)
         st.subheader("Riepilogo Saldi Finali e Acconti da Versare")
         
         # Calcolo totali da versare
-        totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_cedolare_secca + saldo_add_regionale_no_cpb + saldo_add_comunale_no_cpb + saldo_inps_no_cpb + diritto_camerale + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
-        totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_cedolare_secca + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_concordato + diritto_camerale + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_si_cpb + acconto_2_inps_si_cpb
-        totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_cedolare_secca + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_effettivo_finale + diritto_camerale + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_effettivo_finale + acconto_2_inps_effettivo_finale
+        totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_add_regionale_no_cpb + saldo_add_comunale_no_cpb + saldo_inps_no_cpb + diritto_camerale + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
+        totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_concordato + diritto_camerale + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_si_cpb + acconto_2_inps_si_cpb
+        totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_add_regionale_si_cpb + saldo_add_comunale_si_cpb + saldo_inps_si_cpb_effettivo + diritto_camerale + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare + acconto_2_cedolare + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb
 
         df_saldi = pd.DataFrame({
-             "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"N/A", f"{saldo_cedolare_secca:,.2f} €", f"{saldo_add_regionale_no_cpb:,.2f} €", f"{saldo_add_comunale_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_comunale_no_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_no_cpb:,.2f} €**"],
-             "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_cedolare_secca:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_si_cpb:,.2f} €", f"{acconto_2_inps_si_cpb:,.2f} €", f"**{totale_versare_si_cpb_conc:,.2f} €**"],
-             "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_cedolare_secca:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo_finale:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_effettivo_finale:,.2f} €", f"{acconto_2_inps_effettivo_finale:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
+             "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"N/A", f"{imposta_su_cedolare_secca:,.2f} €", f"{saldo_add_regionale_no_cpb:,.2f} €", f"{saldo_add_comunale_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_comunale_no_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_no_cpb:,.2f} €**"],
+             "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{imposta_su_cedolare_secca:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_si_cpb:,.2f} €", f"{acconto_2_inps_si_cpb:,.2f} €", f"**{totale_versare_si_cpb_conc:,.2f} €**"],
+             "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{imposta_su_cedolare_secca:,.2f} €", f"{saldo_add_regionale_si_cpb:,.2f} €", f"{saldo_add_comunale_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"{diritto_camerale:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare:,.2f} €", f"{acconto_2_cedolare:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
         }, index=["IRPEF a Debito/Credito", "Imposta Sostitutiva CPB", "Saldo Cedolare Secca", "Saldo Add. Regionale", "Saldo Add. Comunale", "Saldo INPS a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRPEF", "2° Acconto IRPEF", "Acconto Add. Comunale", "1° Acconto Cedolare Secca", "2° Acconto Cedolare Secca", "1° Acconto INPS", "2° Acconto INPS", "TOTALE DA VERSARE"])
         st.table(df_saldi)
 
@@ -282,7 +267,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             valore_produzione_irap_rettificato_cpb_soc = st.number_input("Valore della produzione IRAP rettificato per CPB SOCIETA' (IP74):", value=318210.49, format="%.2f")
             punteggio_isa_n_soc = st.slider("Punteggio ISA Società (anno n):", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
             diritto_camerale_soc = st.number_input("Diritto Camerale Annuale Società:", value=120.0, format="%.2f", key="dir_cam_soc")
-            acconti_irap_versati = st.number_input("Acconti IRAP Versati:", value=0.0, format="%.2f", key="acc_irap_soc")
+
 
         st.markdown("---")
         st.subheader("Dati dei Singoli Soci")
@@ -308,7 +293,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_socio2:
                 socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA (LC1 colonna 2) Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}")
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
-                socio_data['acconti_cedolare_secca_versati'] = st.number_input(f"Acconti Cedolare Secca Versati Socio {i+1}", value=0.0, format="%.2f", key=f"acc_ced_vers_soc_{i}")
                 socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca (%) Socio {i+1} :", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
             
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
@@ -343,30 +327,18 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
 
     if submitted_soc:
         # CALCOLO IRAP E DIRITTO CAMERALE
-        st.markdown("---"); st.subheader(f"Parte 1: Analisi per la Società: {nome_societa}")
+        st.markdown("---"); st.subheader(f"Parte 1: Analisi Costi Fissi per la Società: {nome_societa}")
         aliquota_irap = 0.039
         irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap
         irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap
-        
-        saldo_irap_no_cpb = irap_no_cpb - acconti_irap_versati
-        saldo_irap_si_cpb = irap_si_cpb - acconti_irap_versati
-
-        acconto_1_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
-        acconto_2_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
-        acconto_1_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
-        acconto_2_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
-
-        totale_soc_no_cpb = saldo_irap_no_cpb + diritto_camerale_soc + acconto_1_irap_no_cpb + acconto_2_irap_no_cpb
-        totale_soc_si_cpb = saldo_irap_si_cpb + diritto_camerale_soc + acconto_1_irap_si_cpb + acconto_2_irap_si_cpb
-
         risparmio_irap = irap_no_cpb - irap_si_cpb
         
         df_costi_societa = pd.DataFrame({
-            "Senza Concordato": [f"{saldo_irap_no_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_no_cpb:,.2f} €", f"{acconto_2_irap_no_cpb:,.2f} €", f"**{totale_soc_no_cpb:,.2f} €**"], 
-            "Con Concordato": [f"{saldo_irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_si_cpb:,.2f} €", f"{acconto_2_irap_si_cpb:,.2f} €", f"**{totale_soc_si_cpb:,.2f} €**"], 
-            "Risparmio/Onere IRAP": [f"{risparmio_irap:,.2f} €", "N/A", "N/A", "N/A", "N/A"]
+            "Senza Concordato": [f"{irap_no_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €"], 
+            "Con Concordato": [f"{irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €"], 
+            "Risparmio/Onere": [f"{risparmio_irap:,.2f} €", "N/A"]
             }, 
-            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE VERSAMENTI SOCIETÀ"])
+            index=["Imposta IRAP Dovuta", "Diritto Camerale Annuale"])
         st.table(df_costi_societa)
         
         st.markdown("---"); st.subheader("Parte 2: Analisi IRPEF e INPS per i Singoli Soci")
@@ -389,7 +361,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             # Calcolo IRPEF lorda
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
             
-            # Calcolo Imposta Sostitutiva e Saldo Cedolare Secca
             base_imponibile_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
             if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
             if punteggio_isa_n_soc >= 8: aliquota_sostitutiva = 0.10
@@ -397,7 +368,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             else: aliquota_sostitutiva = 0.15
             imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
             irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
-            saldo_cedolare_secca_soc = socio['imposta_su_cedolare_secca'] - socio['acconti_cedolare_secca_versati']
 
             # Calcolo Addizionali Lorde
             addizionale_regionale_socio_no_cpb = base_imponibile_no_cpb_irpef * (socio['aliquota_add_regionale'] / 100.0)
@@ -419,15 +389,11 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             saldo_irpef_si_cpb = irpef_netta_si_cpb - socio['imposte_gia_trattenute'] - socio['acconti_versati']
             
             # Calcoli Contributivi e Saldo INPS
-            imponibile_inps_effettivo_soc = quota_reddito_simulato
-            imponibile_inps_concordato_soc = quota_reddito_rettificato_cpb + base_imponibile_sostitutiva
-
-            inps_dovuti_effettivo = calcola_inps_saldo(imponibile_inps_effettivo_soc, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
-            inps_dovuti_concordato = calcola_inps_saldo(imponibile_inps_concordato_soc, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
-            
+            inps_dovuti_effettivo = calcola_inps_saldo(quota_reddito_simulato, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
+            inps_dovuti_concordato = calcola_inps_saldo(quota_reddito_rettificato_cpb + base_imponibile_sostitutiva, socio['gestione_inps'], socio['minimale_inps'], socio['contributi_fissi'], socio['scaglione1_cap_inps'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
             saldo_inps_no_cpb = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
             saldo_inps_si_cpb_concordato = inps_dovuti_concordato - socio['contributi_fissi'] - socio['acconti_inps_versati']
-            saldo_inps_si_cpb_effettivo_base = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
+            saldo_inps_si_cpb_effettivo = inps_dovuti_effettivo - socio['contributi_fissi'] - socio['acconti_inps_versati']
 
             # Calcolo Acconti IRPEF e Comunale
             base_acconto_irpef_no_cpb_soc = irpef_netta_no_cpb - socio['imposte_gia_trattenute']
@@ -448,31 +414,22 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             acconto_2_cedolare_soc = (totale_acconto_cedolare_soc * 0.50) if totale_acconto_cedolare_soc > 0 else 0
 
             # Calcolo Acconti INPS
-            acconto_1_inps_no_cpb_soc, acconto_2_inps_no_cpb_soc = calcola_acconti_inps(imponibile_inps_effettivo_soc, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
-            acconto_1_inps_si_cpb_conc_soc, acconto_2_inps_si_cpb_conc_soc = calcola_acconti_inps(imponibile_inps_concordato_soc, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
-
-            # Logica per colonna "INPS su Effettivo" per il socio
-            if imponibile_inps_effettivo_soc < imponibile_inps_concordato_soc:
-                saldo_inps_si_cpb_effettivo_finale_soc = saldo_inps_si_cpb_concordato
-                acconto_1_inps_effettivo_finale_soc = acconto_1_inps_si_cpb_conc_soc
-                acconto_2_inps_effettivo_finale_soc = acconto_2_inps_si_cpb_conc_soc
-            else:
-                saldo_inps_si_cpb_effettivo_finale_soc = saldo_inps_si_cpb_effettivo_base
-                acconto_1_inps_effettivo_finale_soc = acconto_1_inps_no_cpb_soc
-                acconto_2_inps_effettivo_finale_soc = acconto_2_inps_no_cpb_soc
+            acconto_1_inps_no_cpb, acconto_2_inps_no_cpb = calcola_acconti_inps(quota_reddito_simulato, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
+            acconto_1_inps_si_cpb_conc, acconto_2_inps_si_cpb_conc = calcola_acconti_inps(quota_reddito_rettificato_cpb + base_imponibile_sostitutiva, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
+            acconto_1_inps_si_cpb_eff, acconto_2_inps_si_cpb_eff = calcola_acconti_inps(quota_reddito_simulato, socio['gestione_inps'], socio['imponibile_minimale_acconti_2025'], socio['scaglione1_cap_inps_acconti'], socio['aliquota_inps1'], socio['aliquota_inps2'], socio['massimale_inps'])
 
             # Presentazione risultati per il socio
             st.markdown(f"**Riepilogo Saldi Finali e Acconti da Versare Socio {i+1}**")
             
             # Calcolo totali da versare
-            totale_versare_no_cpb = saldo_irpef_no_cpb + saldo_cedolare_secca_soc + saldo_add_regionale_socio_no_cpb + saldo_add_comunale_socio_no_cpb + saldo_inps_no_cpb + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc + acconto_1_inps_no_cpb_soc + acconto_2_inps_no_cpb_soc
-            totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_cedolare_secca_soc + saldo_add_regionale_socio_si_cpb + saldo_add_comunale_socio_si_cpb + saldo_inps_si_cpb_concordato + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc + acconto_1_inps_si_cpb_conc_soc + acconto_2_inps_si_cpb_conc_soc
-            totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + saldo_cedolare_secca_soc + saldo_add_regionale_socio_si_cpb + saldo_add_comunale_socio_si_cpb + saldo_inps_si_cpb_effettivo_finale_soc + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc + acconto_1_inps_effettivo_finale_soc + acconto_2_inps_effettivo_finale_soc
+            totale_versare_no_cpb = saldo_irpef_no_cpb + socio['imposta_su_cedolare_secca'] + saldo_add_regionale_socio_no_cpb + saldo_add_comunale_socio_no_cpb + saldo_inps_no_cpb + acconto_1_inps_no_cpb + acconto_2_inps_no_cpb + (acconto_irpef_no_cpb * 2) + acconto_comunale_no_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc
+            totale_versare_si_cpb_conc = saldo_irpef_si_cpb + imposta_sostitutiva + socio['imposta_su_cedolare_secca'] + saldo_add_regionale_socio_si_cpb + saldo_add_comunale_socio_si_cpb + saldo_inps_si_cpb_concordato + acconto_1_inps_si_cpb_conc + acconto_2_inps_si_cpb_conc + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc
+            totale_versare_si_cpb_eff = saldo_irpef_si_cpb + imposta_sostitutiva + socio['imposta_su_cedolare_secca'] + saldo_add_regionale_socio_si_cpb + saldo_add_comunale_socio_si_cpb + saldo_inps_si_cpb_effettivo + acconto_1_inps_si_cpb_eff + acconto_2_inps_si_cpb_eff + (acconto_irpef_si_cpb * 2) + acconto_comunale_si_cpb + acconto_1_cedolare_soc + acconto_2_cedolare_soc
 
             df_saldi_socio = pd.DataFrame({
-                 "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"N/A", f"{saldo_cedolare_secca_soc:,.2f} €", f"{saldo_add_regionale_socio_no_cpb:,.2f} €", f"{saldo_add_comunale_socio_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_comunale_no_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_no_cpb_soc:,.2f} €", f"{acconto_2_inps_no_cpb_soc:,.2f} €", f"**{totale_versare_no_cpb:,.2f} €**"],
-                 "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_cedolare_secca_soc:,.2f} €", f"{saldo_add_regionale_socio_si_cpb:,.2f} €", f"{saldo_add_comunale_socio_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_si_cpb_conc_soc:,.2f} €", f"{acconto_2_inps_si_cpb_conc_soc:,.2f} €", f"**{totale_versare_si_cpb_conc:,.2f} €**"],
-                 "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{saldo_cedolare_secca_soc:,.2f} €", f"{saldo_add_regionale_socio_si_cpb:,.2f} €", f"{saldo_add_comunale_socio_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo_finale_soc:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_effettivo_finale_soc:,.2f} €", f"{acconto_2_inps_effettivo_finale_soc:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
+                 "Senza Concordato": [f"{saldo_irpef_no_cpb:,.2f} €", f"N/A", f"{socio['imposta_su_cedolare_secca']:,.2f} €", f"{saldo_add_regionale_socio_no_cpb:,.2f} €", f"{saldo_add_comunale_socio_no_cpb:,.2f} €", f"{saldo_inps_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_irpef_no_cpb:,.2f} €", f"{acconto_comunale_no_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_no_cpb:,.2f} €", f"{acconto_2_inps_no_cpb:,.2f} €", f"**{totale_versare_no_cpb:,.2f} €**"],
+                 "Con Concordato (INPS su Concordato)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{socio['imposta_su_cedolare_secca']:,.2f} €", f"{saldo_add_regionale_socio_si_cpb:,.2f} €", f"{saldo_add_comunale_socio_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_concordato:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_si_cpb_conc:,.2f} €", f"{acconto_2_inps_si_cpb_conc:,.2f} €", f"**{totale_versare_si_cpb_conc:,.2f} €**"],
+                 "Con Concordato (INPS su Effettivo)": [f"{saldo_irpef_si_cpb:,.2f} €", f"{imposta_sostitutiva:,.2f} €", f"{socio['imposta_su_cedolare_secca']:,.2f} €", f"{saldo_add_regionale_socio_si_cpb:,.2f} €", f"{saldo_add_comunale_socio_si_cpb:,.2f} €", f"{saldo_inps_si_cpb_effettivo:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_irpef_si_cpb:,.2f} €", f"{acconto_comunale_si_cpb:,.2f} €", f"{acconto_1_cedolare_soc:,.2f} €", f"{acconto_2_cedolare_soc:,.2f} €", f"{acconto_1_inps_si_cpb_eff:,.2f} €", f"{acconto_2_inps_si_cpb_eff:,.2f} €", f"**{totale_versare_si_cpb_eff:,.2f} €**"],
             }, index=["IRPEF a Debito/Credito", "Imposta Sostitutiva CPB", "Saldo Cedolare Secca", "Saldo Add. Regionale", "Saldo Add. Comunale", "Saldo INPS a Debito/Credito", "1° Acconto IRPEF", "2° Acconto IRPEF", "Acconto Add. Comunale", "1° Acconto Cedolare Secca", "2° Acconto Cedolare Secca", "1° Acconto INPS", "2° Acconto INPS", "TOTALE DA VERSARE"])
             st.table(df_saldi_socio)
             
