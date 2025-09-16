@@ -116,9 +116,9 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col1:
             nome_soggetto = st.text_input(f"NOME {tipo_calcolo.upper()}:", value=f'Mio Studio {tipo_calcolo}')
-            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_simulato_2025 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2025'))
+            reddito_rilevante_cpb_2024 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2024'))
+            reddito_proposto_cpb_2025 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
             reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
             punteggio_isa_n_ind = st.slider("Punteggio ISA:", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
             diritto_camerale = st.number_input("Diritto Camerale Annuale:", value=53.0, format="%.2f", key="dir_cam_ind")
@@ -208,7 +208,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         saldo_add_comunale_si_cpb = addizionale_comunale_si_cpb - addizionale_comunale_trattenuta
         
         # Calcolo Contributi INPS
-        imponibile_inps_effettivo = reddito_simulato_2024
+        imponibile_inps_effettivo = reddito_simulato_2025
         imponibile_inps_concordato = reddito_impresa_rettificato_cpb + base_imponibile_sostitutiva
 
         inps_dovuti_effettivo = calcola_inps_saldo(imponibile_inps_effettivo, gestione_inps, minimale_inps, contributi_fissi, scaglione1_cap_inps, aliquota_inps1, aliquota_inps2, massimale_inps)
