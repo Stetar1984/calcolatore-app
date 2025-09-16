@@ -169,7 +169,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
     if submitted:
         # Calcolo imponibili IRPEF
-        base_imponibile_no_cpb_irpef = reddito_simulato_2024 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
+        base_imponibile_no_cpb_irpef = reddito_simulato_2025 + altri_redditi - oneri_deducibili - cedolare_secca_redditi
         base_imponibile_si_cpb_irpef = altri_redditi + reddito_impresa_rettificato_cpb - oneri_deducibili - cedolare_secca_redditi
         
         # Calcolo IRPEF lorda
