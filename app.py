@@ -1,73 +1,3 @@
-import streamlit as st
-import pandas as pd
-import math
-
-# ==============================================================================
-# --- FUNZIONI DI CALCOLO ---
-# ==============================================================================
-def calcola_irpef(imponibile):
-    """Calcola l'IRPEF lorda basata sugli scaglioni 2024/2025."""
-    if imponibile <= 0: return 0
-    if imponibile <= 28000: return imponibile * 0.23
-    elif imponibile <= 50000: return (28000 * 0.23) + ((imponibile - 28000) * 0.35)
-    else: return (28000 * 0.23) + (22000 * 0.35) + ((imponibile - 50000) * 0.43)
-
-def calcola_inps_saldo(reddito_imponibile, gestione, minimale, fissi, scaglione1_cap, aliquota1, aliquota2, massimale):
-    """Calcola il contributo INPS a saldo (fissi + variabili a scaglioni)."""
-    aliquota1_dec = aliquota1 / 100.0
-    aliquota2_dec = aliquota2 / 100.0
-    
-    reddito_imponibile_capped = min(reddito_imponibile, massimale)
-
-    if gestione == "Gestione Separata":
-        return reddito_imponibile_capped * aliquota1_dec
-    
-    elif gestione in ["Artigiani", "Commercianti"]:
-        if reddito_imponibile_capped <= minimale:
-            return fissi
-        
-        contributo1 = 0
-        if reddito_imponibile_capped > minimale:
-            base_imponibile1 = min(reddito_imponibile_capped, scaglione1_cap) - minimale
-            contributo1 = base_imponibile1 * aliquota1_dec
-        
-        contributo2 = 0
-        if reddito_imponibile_capped > scaglione1_cap:
-            base_imponibile2 = reddito_imponibile_capped - scaglione1_cap
-            contributo2 = base_imponibile2 * aliquota2_dec
-            
-        return fissi + contributo1 + contributo2
-    return 0
-
-def calcola_acconti_inps(reddito_base_acconto, gestione, minimale_acconti, scaglione1_cap_acconti, aliquota1, aliquota2, massimale):
-    """Calcola i due acconti INPS per l'anno successivo."""
-    if gestione == "Gestione Separata":
-        totale_acconto = reddito_base_acconto * (aliquota1 / 100.0)
-        return totale_acconto * 0.50, totale_acconto * 0.50
-
-    base_imponibile_acconto = reddito_base_acconto - minimale_acconti
-    if base_imponibile_acconto <= 0:
-        return 0, 0
-    
-    base_imponibile_acconto_capped = min(base_imponibile_acconto + minimale_acconti, massimale) - minimale_acconti
-
-    aliquota1_dec = aliquota1 / 100.0
-    aliquota2_dec = aliquota2 / 100.0
-    
-    contributo1 = 0
-    if base_imponibile_acconto_capped > 0:
-        cap_primo_scaglione_variabile = scaglione1_cap_acconti - minimale_acconti
-        base1 = min(base_imponibile_acconto_capped, cap_primo_scaglione_variabile)
-        contributo1 = base1 * aliquota1_dec
-    
-    contributo2 = 0
-    if base_imponibile_acconto_capped > (scaglione1_cap_acconti - minimale_acconti):
-        base2 = base_imponibile_acconto_capped - (scaglione1_cap_acconti - minimale_acconti)
-        contributo2 = base2 * aliquota2_dec
-        
-    totale_acconto = contributo1 + contributo2
-    return totale_acconto * 0.50, totale_acconto * 0.50
-
 # ==============================================================================
 # --- IMPOSTAZIONI PAGINA E TITOLO ---
 # ==============================================================================
@@ -223,10 +153,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-        acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
-        acconto_comunale_no_cpb = base_imponibile_no_cpb_irpef - acconto_addizionale_comunale_trattenuto
+        acconto_comunale_lordo_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
-        acconto_comunale_lordo_si_cpb = acconto_comunale_lordo_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
 
         totale_acconto_cedolare = cedolare_secca_redditi * (aliquota_acconto_cedolare / 100.0)
@@ -343,7 +273,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
 
     if submitted_soc:
         # CALCOLO IRAP E DIRITTO CAMERALE
-        st.markdown("---"); st.subheader(f"Parte 1: Analisi per la Società: {nome_societa}")
+        st.markdown("---"); st.subheader(f"Parte 1: Analisi Costi Fissi per la Società: {nome_societa}")
         aliquota_irap = 0.039
         irap_no_cpb = valore_produzione_simulato_2024_soc * aliquota_irap
         irap_si_cpb = valore_produzione_irap_rettificato_cpb_soc * aliquota_irap
@@ -366,7 +296,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             "Con Concordato": [f"{saldo_irap_si_cpb:,.2f} €", f"{diritto_camerale_soc:,.2f} €", f"{acconto_1_irap_si_cpb:,.2f} €", f"{acconto_2_irap_si_cpb:,.2f} €", f"**{totale_soc_si_cpb:,.2f} €**"], 
             "Risparmio/Onere IRAP": [f"{risparmio_irap:,.2f} €", "N/A", "N/A", "N/A", "N/A"]
             }, 
-            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE VERSAMENTI SOCIETÀ"])
+            index=["Saldo IRAP a Debito/Credito", "Diritto Camerale Annuale", "1° Acconto IRAP", "2° Acconto IRAP", "TOTALE COSTI SOCIETÀ"])
         st.table(df_costi_societa)
         
         st.markdown("---"); st.subheader("Parte 2: Analisi IRPEF e INPS per i Singoli Soci")
