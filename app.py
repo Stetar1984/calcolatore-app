@@ -233,7 +233,6 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-
         acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
@@ -457,11 +456,11 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             base_acconto_irpef_si_cpb_soc = irpef_netta_si_cpb - socio['imposte_gia_trattenute']
             acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb_soc * 0.50) if base_acconto_irpef_si_cpb_soc > 0 else 0
 
-            acconto_comunale_lordo_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
-            acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - socio['acconto_addizionale_comunale_trattenuto']
+            acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
+            acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
-            acconto_comunale_lordo_si_cpb = addizionale_comunale_socio_si_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
-            acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - socio['acconto_addizionale_comunale_trattenuto']
+            acconto_comunale_lordo_si_cpb = base_imponibile_si_cpb_irpef * (aliquota_acconto_comunale / 100.0)
+            acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
 
             # Calcolo Acconti Cedolare Secca
             totale_acconto_cedolare_soc = socio['cedolare_secca_redditi'] * (socio['aliquota_acconto_cedolare'] / 100.0)
