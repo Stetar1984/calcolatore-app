@@ -174,15 +174,25 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         
         # Calcolo IRPEF lorda
         irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
+        irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
         
         # Calcolo Imposta Sostitutiva e Saldo Cedolare Secca
         base_imponibile_sostitutiva = reddito_proposto_cpb_2024 - reddito_rilevante_cpb_2023
         if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
-        if punteggio_isa_n_ind >= 8: aliquota_sostitutiva = 0.10
-        elif punteggio_isa_n_ind >= 6: aliquota_sostitutiva = 0.12
-        else: aliquota_sostitutiva = 0.15
-        imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
-        irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
+        
+        if punteggio_isa_n_ind >= 8: aliquota_sostitutiva_perc = 0.10
+        elif punteggio_isa_n_ind >= 6: aliquota_sostitutiva_perc = 0.12
+        else: aliquota_sostitutiva_perc = 0.15
+
+        irpef_eccedenza = 0
+        if base_imponibile_sostitutiva > 85000:
+            eccedenza = base_imponibile_sostitutiva - 85000
+            irpef_eccedenza = eccedenza * 0.43
+            imposta_sostitutiva = 85000 * aliquota_sostitutiva_perc
+            irpef_lorda_si_cpb += irpef_eccedenza
+        else:
+            imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva_perc
+            
         saldo_cedolare_secca = imposta_su_cedolare_secca - acconti_cedolare_secca_versati
 
         # Calcolo Addizionali Lorde
@@ -223,10 +233,10 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-        acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
-        acconto_comunale_no_cpb = base_imponibile_no_cpb_irpef - acconto_addizionale_comunale_trattenuto
+        acconto_comunale_lordo_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
-        acconto_comunale_lordo_si_cpb = irpef_netta_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
 
         totale_acconto_cedolare = cedolare_secca_redditi * (aliquota_acconto_cedolare / 100.0)
@@ -308,7 +318,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_socio2:
                 socio_data['cedolare_secca_redditi'] = st.number_input(f"REDDITI A CEDOLARE SECCA (LC1 colonna 2) Socio {i+1}", value=0.0, format="%.2f", key=f"csr_soc_{i}")
                 socio_data['imposta_su_cedolare_secca'] = st.number_input(f"IMPOSTA SU CEDOLARE SECCA (LC1 colonna 12/13) Socio {i+1}", value=0.0, format="%.2f", key=f"ics_soc_{i}")
-                socio_data['acconti_cedolare_secca_versati'] = st.number_input(f"Acconti Cedolare Secca Versati Socio {i+1}", value=0.0, format="%.2f", key=f"acc_ced_vers_soc_{i}")
+                socio_data['acconti_cedolare_secca_versati'] = st.number_input("Acconti Cedolare Secca Versati:", value=0.0, format="%.2f", key=f"acc_ced_vers_soc_{i}")
                 socio_data['aliquota_acconto_cedolare'] = st.selectbox(f"Aliquota Acconto Cedolare Secca (%) Socio {i+1} :", [10.0, 21.0], key=f"aliq_acc_ced_soc_{i}")
             
             st.markdown(f"**Addizionali e Contributi Socio {i+1}**")
@@ -388,15 +398,25 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             
             # Calcolo IRPEF lorda
             irpef_lorda_no_cpb = calcola_irpef(base_imponibile_no_cpb_irpef)
-            
+            irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
+
             # Calcolo Imposta Sostitutiva e Saldo Cedolare Secca
             base_imponibile_sostitutiva = quota_reddito_proposto - quota_reddito_rilevante
             if base_imponibile_sostitutiva < 0: base_imponibile_sostitutiva = 0
-            if punteggio_isa_n_soc >= 8: aliquota_sostitutiva = 0.10
-            elif punteggio_isa_n_soc >= 6: aliquota_sostitutiva = 0.12
-            else: aliquota_sostitutiva = 0.15
-            imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva
-            irpef_lorda_si_cpb = calcola_irpef(base_imponibile_si_cpb_irpef)
+            
+            if punteggio_isa_n_soc >= 8: aliquota_sostitutiva_perc = 0.10
+            elif punteggio_isa_n_soc >= 6: aliquota_sostitutiva_perc = 0.12
+            else: aliquota_sostitutiva_perc = 0.15
+            
+            irpef_eccedenza_soc = 0
+            if base_imponibile_sostitutiva > 85000:
+                eccedenza_soc = base_imponibile_sostitutiva - 85000
+                irpef_eccedenza_soc = eccedenza_soc * 0.43
+                imposta_sostitutiva = 85000 * aliquota_sostitutiva_perc
+                irpef_lorda_si_cpb += irpef_eccedenza_soc
+            else:
+                imposta_sostitutiva = base_imponibile_sostitutiva * aliquota_sostitutiva_perc
+                
             saldo_cedolare_secca_soc = socio['imposta_su_cedolare_secca'] - socio['acconti_cedolare_secca_versati']
 
             # Calcolo Addizionali Lorde
