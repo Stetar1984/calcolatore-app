@@ -226,7 +226,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_no_cpb = base_imponibile_no_cpb_irpef - acconto_addizionale_comunale_trattenuto
 
-        acconto_comunale_lordo_si_cpb = acconto_comunale_lordo_si_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_si_cpb = irpef_netta_si_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - acconto_addizionale_comunale_trattenuto
 
         totale_acconto_cedolare = cedolare_secca_redditi * (aliquota_acconto_cedolare / 100.0)
