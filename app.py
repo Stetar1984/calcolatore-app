@@ -464,7 +464,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             acconto_comunale_lordo_no_cpb = base_imponibile_no_cpb_irpef * (socio['aliquota_acconto_comunale'] / 100.0)
             acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - socio['acconto_addizionale_comunale_trattenuto']
 
-            acconto_comunale_lordo_si_cpb =  * (socio['aliquota_acconto_comunale'] / 100.0)
+            acconto_comunale_lordo_si_cpb = base_imponibile_si_cpb_irpef * (socio['aliquota_acconto_comunale'] / 100.0)
             acconto_comunale_si_cpb = acconto_comunale_lordo_si_cpb - socio['acconto_addizionale_comunale_trattenuto']
 
             # Calcolo Acconti Cedolare Secca
