@@ -460,9 +460,6 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             
             base_acconto_irpef_si_cpb_soc = irpef_netta_si_cpb - socio['imposte_gia_trattenute']
             acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb_soc * 0.50) if base_acconto_irpef_si_cpb_soc > 0 else 0
-            
-            base_acconto_irpef_si_cpb_soc = base_imponibile_si_cpb_irpef - socio['imposte_gia_trattenute']
-            acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb_soc * 0.50) if base_acconto_irpef_si_cpb_soc > 0 else 0
 
             acconto_comunale_lordo_no_cpb = addizionale_comunale_socio_no_cpb * (socio['aliquota_acconto_comunale'] / 100.0)
             acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - socio['acconto_addizionale_comunale_trattenuto']
