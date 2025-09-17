@@ -116,16 +116,16 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
 
         with col1:
             nome_soggetto = st.text_input(f"NOME {tipo_calcolo.upper()}:", value=f'Mio Studio {tipo_calcolo}')
-            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=70000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
-            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=65000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
-            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
-            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=72000.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
+            reddito_simulato_2024 = st.number_input("REDDITO EFFETTIVO O SIMULATO (CP10 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_simulato_2024'))
+            reddito_rilevante_cpb_2023 = st.number_input("REDDITO RILEVANTE CPB (CP1 colonna 2):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_rilevante_cpb_2023'))
+            reddito_proposto_cpb_2024 = st.number_input("REDDITO PROPOSTO AI FINI CPB (CP1 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_proposto_cpb_2024'))
+            reddito_impresa_rettificato_cpb = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB (CP7 colonna 5):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('reddito_impresa_rettificato_cpb'))
             punteggio_isa_n_ind = st.slider("Punteggio ISA:", min_value=1.0, max_value=10.0, value=8.0, step=0.1)
             diritto_camerale = st.number_input("Diritto Camerale Annuale:", value=53.0, format="%.2f", key="dir_cam_ind")
 
         with col2:
-            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN senza H + LC2 colonna 1):", value=5000.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
-            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=2000.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
+            altri_redditi = st.number_input("ALTRI REDDITI TASSABILI IRPEF (da riepilogo redditi RN senza H + LC2 colonna 1):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('altri_redditi'))
+            oneri_deducibili = st.number_input("ONERI DEDUCIBILI (RN3):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('oneri_deducibili'))
             imposte_gia_trattenute = st.number_input("RITENUTE TOTALI SUBITE (RN33 colonna 4):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('imposte_gia_trattenute'))
             acconti_versati = st.number_input("ACCONTI IRPEF VERSATI (RN38 colonna 6):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('acconti versati'))
             detrazioni_irpef = st.number_input("DETRAZIONI IRPEF TOTALI (RN22):", value=0.0, format="%.2f", help=descrizioni_aggiuntive.get('detrazioni IRPEF'))
@@ -140,7 +140,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         col_add1, col_add2 = st.columns(2)
         with col_add1:
             st.markdown("**Addizionali IRPEF**")
-            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (RV2 colonna 2/RV1)*100:", value=1.23, format="%.2f", key="add_reg_ind")
+            aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (RV2 colonna 2/RV1)*100:", value=0.0, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%) (RV10 colonna 2/RV1)*100:", value=0.80, format="%.2f", key="add_com_ind")
             aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
             addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta (RV3 colonna 3):", value=0.0, format="%.2f", key="add_reg_trat_ind")
@@ -151,11 +151,11 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             st.markdown("**Dati Contributivi (INPS) - Valori 2024**")
             gestione_inps = st.selectbox("Gestione INPS:", ("Artigiani", "Commercianti", "Gestione Separata"), key="gest_ind")
             acconti_inps_versati = st.number_input("Acconti INPS Versati su reddito ecc. il minimale (da RR2 colonna 27):", value=0.0, format="%.2f", key="acc_inps_ind")
-            imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18415.0, format="%.2f", key="min_acc_ind")
+            imponibile_minimale_acconti_2025 = st.number_input("Imponibile Minimale Acconti INPS 2025:", value=18555.0, format="%.2f", key="min_acc_ind")
 
         col_inps1, col_inps2, col_inps3 = st.columns(3)
         with col_inps1:
-            contributi_fissi = st.number_input("Contributi su minimale INPS Versati (da RR2 colonna 14):", value=4515.43, format="%.2f", key="fissi_ind")
+            contributi_fissi = st.number_input("Contributi su minimale INPS Versati (da RR2 colonna 14):", value=0.0, format="%.2f", key="fissi_ind")
             minimale_inps = st.number_input("Reddito Minimale INPS (saldo):", value=18415.0, format="%.2f", key="min_ind")
         with col_inps2:
             scaglione1_cap_inps = st.number_input("Cap 1° Scaglione INPS (saldo):", value=55008.0, format="%.2f", key="cap1_ind")
@@ -233,7 +233,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
         base_acconto_irpef_si_cpb = irpef_netta_si_cpb - imposte_gia_trattenute
         acconto_irpef_si_cpb = (base_acconto_irpef_si_cpb * 0.50) if base_acconto_irpef_si_cpb > 0 else 0
 
-        acconto_comunale_lordo_no_cpb = addizionale_comunale_no_cpb * (aliquota_acconto_comunale / 100.0)
+        acconto_comunale_lordo_no_cpb = irpef_netta_no_cpb * (aliquota_acconto_comunale / 100.0)
         acconto_comunale_no_cpb = acconto_comunale_lordo_no_cpb - acconto_addizionale_comunale_trattenuto
 
         acconto_comunale_lordo_si_cpb = addizionale_comunale_si_cpb * (aliquota_acconto_comunale / 100.0)
