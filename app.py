@@ -502,3 +502,104 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             st.table(df_saldi_socio)
             
             st.markdown("---")
+
+#==============================================================================
+# --- CALCOLATORE PER SOCIETÀ DI CAPITALI ---
+#==============================================================================
+elif tipo_calcolo == 'Società di Capitali':
+    st.header("Simulazione per Società di Capitali (IRES)")
+
+    with st.form("form_societa_capitali"):
+        st.subheader("Dati Società")
+        col1_cap, col2_cap = st.columns(2)
+        with col1_cap:
+            nome_societa_cap = st.text_input("NOME SOCIETA':", value='Mia S.r.l.')
+            reddito_simulato_2024_cap = st.number_input("REDDITO IMPONIBILE IRES EFFETTIVO O SIMULATO:", value=150000.0, format="%.2f")
+            reddito_rilevante_cpb_2023_cap = st.number_input("REDDITO RILEVANTE CPB:", value=140000.0, format="%.2f")
+            reddito_proposto_cpb_2024_cap = st.number_input("REDDITO PROPOSTO AI FINI CPB:", value=160000.0, format="%.2f")
+            reddito_impresa_rettificato_cpb_cap = st.number_input("REDDITO D'IMPRESA RETTIFICATO PER CPB:", value=160000.0, format="%.2f")
+            punteggio_isa_n_cap = st.slider("Punteggio ISA Società:", min_value=1.0, max_value=10.0, value=9.0, step=0.1)
+            
+        with col2_cap:
+            valore_produzione_simulato_2024_cap = st.number_input("VALORE PRODUZIONE EFFETTIVO O SIMULATO:", value=180000.0, format="%.2f")
+            valore_produzione_irap_rettificato_cpb_cap = st.number_input("Valore della produzione IRAP rettificato per CPB:", value=190000.0, format="%.2f")
+            diritto_camerale_cap = st.number_input("Diritto Camerale Annuale Società:", value=120.0, format="%.2f")
+            acconti_ires_versati = st.number_input("Acconti IRES Versati:", value=0.0, format="%.2f")
+            acconti_irap_versati_cap = st.number_input("Acconti IRAP Versati:", value=0.0, format="%.2f")
+
+        submitted_cap = st.form_submit_button("Esegui Simulazione Società di Capitali")
+
+    if submitted_cap:
+        st.markdown(f"<h4>Risultati Dettagliati per: {nome_societa_cap}</h4>", unsafe_allow_html=True)
+
+        # --- Calcoli Senza Concordato ---
+        ires_no_cpb = calcola_ires(reddito_simulato_2024_cap)
+        saldo_ires_no_cpb = ires_no_cpb - acconti_ires_versati
+        irap_no_cpb = valore_produzione_simulato_2024_cap * 0.039
+        saldo_irap_no_cpb = irap_no_cpb - acconti_irap_versati_cap
+        
+        acconto_1_ires_no_cpb = (ires_no_cpb * 0.50) if ires_no_cpb > 20.66 else 0
+        acconto_2_ires_no_cpb = (ires_no_cpb * 0.50) if ires_no_cpb > 20.66 else 0
+        acconto_1_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
+        acconto_2_irap_no_cpb = (irap_no_cpb * 0.50) if irap_no_cpb > 20.66 else 0
+
+        totale_versare_no_cpb = saldo_ires_no_cpb + saldo_irap_no_cpb + diritto_camerale_cap + acconto_1_ires_no_cpb + acconto_2_ires_no_cpb + acconto_1_irap_no_cpb + acconto_2_irap_no_cpb
+
+        # --- Calcoli Con Concordato ---
+        base_imponibile_sostitutiva_cap = reddito_proposto_cpb_2024_cap - reddito_rilevante_cpb_2023_cap
+        if base_imponibile_sostitutiva_cap < 0: base_imponibile_sostitutiva_cap = 0
+
+        if punteggio_isa_n_cap >= 8: aliquota_sostitutiva_perc_cap = 0.10
+        elif punteggio_isa_n_cap >= 6: aliquota_sostitutiva_perc_cap = 0.12
+        else: aliquota_sostitutiva_perc_cap = 0.15
+        
+        imposta_sostitutiva_cap = base_imponibile_sostitutiva_cap * aliquota_sostitutiva_perc_cap
+        
+        ires_si_cpb = calcola_ires(reddito_impresa_rettificato_cpb_cap)
+        saldo_ires_si_cpb = ires_si_cpb - acconti_ires_versati
+        irap_si_cpb = valore_produzione_irap_rettificato_cpb_cap * 0.039
+        saldo_irap_si_cpb = irap_si_cpb - acconti_irap_versati_cap
+
+        acconto_1_ires_si_cpb = (ires_si_cpb * 0.50) if ires_si_cpb > 20.66 else 0
+        acconto_2_ires_si_cpb = (ires_si_cpb * 0.50) if ires_si_cpb > 20.66 else 0
+        acconto_1_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
+        acconto_2_irap_si_cpb = (irap_si_cpb * 0.50) if irap_si_cpb > 20.66 else 0
+
+        totale_versare_si_cpb = saldo_ires_si_cpb + imposta_sostitutiva_cap + saldo_irap_si_cpb + diritto_camerale_cap + acconto_1_ires_si_cpb + acconto_2_ires_si_cpb + acconto_1_irap_si_cpb + acconto_2_irap_si_cpb
+
+        # --- Creazione Tabella Risultati ---
+        df_capitali = pd.DataFrame({
+            "Senza Concordato": [
+                f"{saldo_ires_no_cpb:,.2f} €",
+                "N/A",
+                f"{saldo_irap_no_cpb:,.2f} €",
+                f"{diritto_camerale_cap:,.2f} €",
+                f"{acconto_1_ires_no_cpb:,.2f} €",
+                f"{acconto_2_ires_no_cpb:,.2f} €",
+                f"{acconto_1_irap_no_cpb:,.2f} €",
+                f"{acconto_2_irap_no_cpb:,.2f} €",
+                f"**{totale_versare_no_cpb:,.2f} €**"
+            ],
+            "Con Concordato": [
+                f"{saldo_ires_si_cpb:,.2f} €",
+                f"{imposta_sostitutiva_cap:,.2f} €",
+                f"{saldo_irap_si_cpb:,.2f} €",
+                f"{diritto_camerale_cap:,.2f} €",
+                f"{acconto_1_ires_si_cpb:,.2f} €",
+                f"{acconto_2_ires_si_cpb:,.2f} €",
+                f"{acconto_1_irap_si_cpb:,.2f} €",
+                f"{acconto_2_irap_si_cpb:,.2f} €",
+                f"**{totale_versare_si_cpb:,.2f} €**"
+            ]
+        }, index=[
+            "Saldo IRES a Debito/Credito",
+            "Imposta Sostitutiva CPB",
+            "Saldo IRAP a Debito/Credito",
+            "Diritto Camerale Annuale",
+            "1° Acconto IRES",
+            "2° Acconto IRES",
+            "1° Acconto IRAP",
+            "2° Acconto IRAP",
+            "TOTALE VERSAMENTI"
+        ])
+        st.table(df_capitali)
