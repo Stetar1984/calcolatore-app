@@ -331,7 +331,7 @@ elif tipo_calcolo == 'Società in trasparenza fiscale':
             with col_add_soc1:
                 socio_data['aliquota_add_regionale'] = col_add_soc1.number_input(f"Aliquota Add. Regionale (%) (RV2 colonna 2/RV1)*100 Socio {i+1}", value=1.73, format="%.2f", key=f"add_reg_soc_{i}")
                 socio_data['aliquota_add_comunale'] = col_add_soc1.number_input(f"Aliquota Add. Comunale (%) (RV10 colonna 2/RV1)*100 Socio {i+1}", value=0.8, format="%.2f", key=f"add_com_soc_{i}")
-                socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f"Aliquota Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
+                socio_data['aliquota_acconto_comunale'] = col_add_soc1.number_input(f" Acconto Add. Comunale (%) Socio {i+1}", value=30.0, format="%.2f", key=f"acc_com_soc_{i}")
                 socio_data['addizionale_regionale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Regionale già Trattenuta Socio (RV3 colonna 3) {i+1}:", value=0.0, format="%.2f", key=f"add_reg_trat_soc_{i}")
                 socio_data['addizionale_comunale_trattenuta'] = col_add_soc1.number_input(f"Saldo Add. Comunale già Trattenuta Socio (RV11 colonna 6) {i+1}:", value=0.0, format="%.2f", key=f"add_com_trat_soc_{i}")
                 socio_data['acconto_addizionale_comunale_trattenuto'] = col_add_soc1.number_input(f"Acconto Add. Comunale già Trattenuto Socio (RV17 colonna 6) {i+1}:", value=0.0, format="%.2f", key=f"add_com_acc_trat_soc_{i}")
