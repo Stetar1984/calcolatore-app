@@ -147,7 +147,7 @@ if tipo_calcolo == 'Ditta Individuale' or tipo_calcolo == 'Professionista':
             st.markdown("**Addizionali IRPEF**")
             aliquota_add_regionale = st.number_input("Aliquota Addizionale Regionale (%) (RV2 colonna 2/RV1)*100:", value=1.23, format="%.2f", key="add_reg_ind")
             aliquota_add_comunale = st.number_input("Aliquota Addizionale Comunale (%) (RV10 colonna 2/RV1)*100:", value=0.80, format="%.2f", key="add_com_ind")
-            aliquota_acconto_comunale = st.number_input("Aliquota Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
+            aliquota_acconto_comunale = st.number_input("Acconto Add. Comunale (%):", value=30.0, format="%.2f", key="acc_com_ind")
             addizionale_regionale_trattenuta = st.number_input("Saldo Add. Regionale già Trattenuta (RV3 colonna 3):", value=0.0, format="%.2f", key="add_reg_trat_ind")
             addizionale_comunale_trattenuta = st.number_input("Saldo Add. Comunale già Trattenuta (RV11 colonna 6):", value=0.0, format="%.2f", key="add_com_trat_ind")
             acconto_addizionale_comunale_trattenuto = st.number_input("Acconto Add. Comunale già Trattenuto (RV17 colonna 6):", value=0.0, format="%.2f", key="add_com_acc_trat_ind")
